@@ -14,12 +14,15 @@
   "author": "Coder Couple",
   "license": "UNLICENSED",
   "dependencies": {
+    "csv-parse": "^4.8.5",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-fileupload": "^1.1.6",
     "sequelize": "^5.21.3"
   },
   "devDependencies": {
     "@types/express": "^4.17.2",
+    "@types/express-fileupload": "^1.1.0",
     "@types/node": "^13.7.0",
     "@types/sequelize": "^4.28.8",
     "ts-node-dev": "^1.0.0-pre.44",
