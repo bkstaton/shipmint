@@ -1,6 +1,7 @@
 import dotenv from 'dotenv';
 import express, { Request, Response } from 'express';
 import fileUpload from 'express-fileupload';
+import path from 'path';
 
 import customers from './controllers/customers';
 import reports from './controllers/reports';
@@ -20,9 +21,13 @@ app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 },
 }));
 
-app.get('/', (req: Request, res: Response) => res.send('Hello World!'));
-
 app.use('/customers', customers);
 app.use('/reports', reports);
+
+app.use(express.static(path.join(__dirname, 'app', 'build')));
+
+app.get('/*', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
+});
 
 app.listen(port, () => console.log(`Listening on port ${port}`));
