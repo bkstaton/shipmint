@@ -1,6 +1,7 @@
 import * as React from 'react';
 import useSWR, { mutate } from 'swr';
 import fetcher from '../fetcher';
+import { Link } from 'react-router-dom';
 
 const Navbar = () => {
     const { data: user } = useSWR(
@@ -15,14 +16,14 @@ const Navbar = () => {
     return (
         <div className="navbar is-dark">
             <div className="navbar-brand">
-                <a className="navbar-item" href="/">
+                <Link className="navbar-item" to="/">
                     <img src="https://goshipmint.com/wp-content/uploads/2019/02/goshipmint-logo.png" />
-                </a>
+                </Link>
             </div>
             <div className="navbar-menu">
                 <div className="navbar-end">
                     {!user
-                        ? <a className="navbar-item" href="/login">Login</a>
+                        ? <Link className="navbar-item" to="/login">Login</Link>
                         : <a className="navbar-item" href="/auth/logout">Logout</a>
                     }
                 </div>

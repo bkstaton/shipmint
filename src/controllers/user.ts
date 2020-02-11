@@ -8,6 +8,8 @@ user.get('/', (req: Request, res: Response) => {
         res.send({
             googleProfileId: (req.user as any).googleProfileId
         });
+
+        return;
     }
 
     res.status(201).send(null);
