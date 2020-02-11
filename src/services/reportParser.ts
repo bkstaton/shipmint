@@ -113,7 +113,7 @@ const parse = (data: Buffer) => {
 
     rows.forEach((row) => {
         const method = row[Columns.Method];
-        if (!Object.values(Method).includes(method)) {
+        if (!Object.keys(Method).includes(method)) {
             return;
         }
 
