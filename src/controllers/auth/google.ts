@@ -11,7 +11,9 @@ google.get('/callback',
     'google',
     { failureRedirect: '/login' }),
     function(req, res) {
-        res.redirect('/');
+      if (req.session) {
+        req.session.save(() => res.redirect('/'));
+      }
     }
 );
 
