@@ -5,7 +5,8 @@
   "main": "server.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpileOnly ./src/server.ts",
-    "build": "tsc"
+    "build": "tsc",
+    "build-app": "npm run build --prefix src/app"
   },
   "repository": {
     "type": "git",
