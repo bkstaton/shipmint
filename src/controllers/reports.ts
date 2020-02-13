@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 
-import parse from '../services/reportParser';
+import parse from '../services/fedex/reportParser';
 
 const reports = express.Router();
 
