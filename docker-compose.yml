@@ -7,5 +7,11 @@ services:
     environment: 
       - GOOGLE_CLIENT_ID
       - GOOGLE_CLIENT_SECRET
+  db:
+    image: mariadb
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=pumpkin
+      - MYSQL_DATABASE=shipmint
 
 
