@@ -1,18 +1,28 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  Model
+} from 'sequelize';
 
-const sequelize = new Sequelize('sqlite::memory:');
+import models from './index';
 
-const Customer = sequelize.define('Customer', {
-    // Model attributes are defined here
-    name: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-  }
-  
-  , {
- 
-  });
-  
-  // `sequelize.define` also returns the model
-  console.log(Customer === sequelize.models.Customer); // true
+class Customer extends Model {
+  // Sequelize-managed fields
+  public readonly id!: number;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+
+  // Custom fields
+  public name!: string;
+};
+
+Customer.init({
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+}, {
+  tableName: 'customers',
+  sequelize: models,
+});
+
+export default Customer;

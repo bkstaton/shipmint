@@ -1,24 +1,37 @@
-FROM node:lts-alpine as build
+FROM node:lts-alpine as backend
 
-COPY ./src ./src
+WORKDIR /srv
 
-COPY package.json package-lock.json ./
+COPY package.json /srv/
+COPY package-lock.json /srv/
 RUN npm install
 
-COPY tsconfig.json ./
+COPY tsconfig.json /srv/
+
+COPY src /srv/src
+
 RUN npm run build
 
-WORKDIR src/app
+FROM node:lts-alpine as frontend
+
+COPY src/app/package.json /srv/
+COPY src/app/package-lock.json /srv/
+
+WORKDIR /srv/
+
 RUN npm install
+
+COPY src/app /srv/
+
 RUN npm run build
 
 FROM node:lts-alpine as app
 
-COPY package.json package-lock.json ./
-RUN npm install --production
+COPY --from=backend /srv/dist /srv/
+COPY --from=backend /srv/node_modules /srv/node_modules/
 
-COPY --from=build ./dist ./
+COPY --from=frontend /srv/build /srv/app/build
 
-COPY --from=build ./src/app/build ./app/build
+WORKDIR /srv
 
 ENTRYPOINT ["node", "server.js"]

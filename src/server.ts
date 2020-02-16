@@ -1,15 +1,15 @@
 import dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Request, Response } from 'express';
 import session from 'express-session';
 import fileUpload from 'express-fileupload';
 import path from 'path';
-
-dotenv.config();
+import passport from 'passport';
 
 import { requireAuth } from './authentication/middleware';
 import auth from './controllers/auth/auth';
 import customers from './controllers/customers';
-import passport from 'passport';
 import user from './controllers/user';
 
 // Workaround for Docker not sending Ctrl-C to process correctly

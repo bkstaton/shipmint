@@ -1,18 +1,25 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import {
+  DataTypes,
+  Model
+} from 'sequelize';
 
-const sequelize = new Sequelize('sqlite::memory:');
+import models from './index';
 
-const Benchmark = sequelize.define('Benchmark', {
-    // Model attributes are defined here
-    firstName: {
-      type: DataTypes.STRING,
-      allowNull: false
-    },
-  }
-  
-  , {
- 
-  });
-  
-  // `sequelize.define` also returns the model
-  console.log(Benchmark === sequelize.models.Benchmark); // true
+class Benchmark extends Model {
+  // Sequelize-managed fields
+  public readonly id!: number;
+  public readonly createdAt!: Date;
+  public readonly updatedAt!: Date;
+};
+
+Benchmark.init({
+  firstName: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+}, {
+  tableName: 'benchmarks',
+  sequelize: models,
+});
+
+export default Benchmark;
