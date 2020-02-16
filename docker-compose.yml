@@ -4,14 +4,18 @@ services:
     build: .
     ports:
       - "3000:3000"
+    depends_on:
+      - db
+    restart: on-failure
     environment: 
       - GOOGLE_CLIENT_ID
       - GOOGLE_CLIENT_SECRET
+      - CONNECTION_STRING
   db:
     image: mariadb
     restart: always
+    ports:
+      - "3306:3306"
     environment:
       - MYSQL_ROOT_PASSWORD=pumpkin
       - MYSQL_DATABASE=shipmint
-
-
