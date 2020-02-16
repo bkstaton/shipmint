@@ -9,7 +9,6 @@ dotenv.config();
 import { requireAuth } from './authentication/middleware';
 import auth from './controllers/auth/auth';
 import customers from './controllers/customers';
-import reports from './controllers/reports';
 import passport from 'passport';
 import user from './controllers/user';
 
@@ -37,7 +36,6 @@ const api = express.Router();
 
 api.use('/user', requireAuth, user);
 api.use('/customers', requireAuth, customers);
-api.use('/reports', requireAuth, reports);
 
 app.use('/api', api);
 
