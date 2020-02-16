@@ -2,9 +2,9 @@ import express, { Request, Response } from 'express';
 
 import parse from '../services/reportParser';
 
-const reports = express.Router();
+const benchmarks = express.Router({ mergeParams: true });
 
-reports.post('/', (req: Request, res: Response) => {
+benchmarks.post('/', (req: Request, res: Response) => {
     if (!req.files || !req.files.report || Array.isArray(req.files.report)) {
         res.status(400).send('Single report file is required.');
         return;
@@ -19,4 +19,14 @@ reports.post('/', (req: Request, res: Response) => {
     });
 });
 
-export default reports;
+benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {
+    const customerId = req.params.customerId;
+    const benchmarkId = req.params.benchmarkId;
+
+    res.send({
+        customerId,
+        benchmarkId,
+    });
+});
+
+export default benchmarks;

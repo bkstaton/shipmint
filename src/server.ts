@@ -10,7 +10,6 @@ import passport from 'passport';
 import { requireAuth } from './authentication/middleware';
 import auth from './controllers/auth/auth';
 import customers from './controllers/customers';
-import reports from './controllers/reports';
 import user from './controllers/user';
 
 // Workaround for Docker not sending Ctrl-C to process correctly
@@ -37,7 +36,6 @@ const api = express.Router();
 
 api.use('/user', requireAuth, user);
 api.use('/customers', requireAuth, customers);
-api.use('/reports', requireAuth, reports);
 
 app.use('/api', api);
 
