@@ -1,6 +1,7 @@
 import express, { Request, Response } from 'express';
 
-import parse from '../services/reportParser';
+import parseFedex from '../services/benchmark/parser/fedex';
+import calculate from '../services/benchmark/calculate';
 
 const benchmarks = express.Router({ mergeParams: true });
 
@@ -12,10 +13,12 @@ benchmarks.post('/', (req: Request, res: Response) => {
     
     const report = req.files.report;
 
+    const benchmark = calculate(parseFedex(report.data));
+
     res.send({
         customerId: req.body.customerId,
         name: report.name,
-        summary: parse(report.data),
+        benchmark,
     });
 });
 
