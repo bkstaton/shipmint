@@ -41,7 +41,11 @@ app.use('/api', api);
 
 app.use(express.static(path.join(__dirname, 'app', 'build')));
 
-app.get('/*', (req: Request, res: Response) => {
+app.get('/login', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
+});
+
+app.get('/*', requireAuth, (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
 });
 

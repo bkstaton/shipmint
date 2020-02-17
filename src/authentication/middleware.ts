@@ -5,7 +5,7 @@ const requireAuth = (req: Request, res: Response, next: Function) => {
         return next();
     }
     
-    res.status(403).send();
+    res.redirect('/login');
 };
 
 export { requireAuth };
