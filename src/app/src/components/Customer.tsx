@@ -28,7 +28,7 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                     <tr onClick={() => history.push(`/customers/${props.match.params.id}/benchmarks/1`)}>
                         <td>02/16/2020</td>
                         <td>Benchmark</td>
-                        <td><button type="button" className="button is-link">some-file.csv</button></td>
+                        <td><button type="button" className="button is-text">some-file.csv</button></td>
                     </tr>
                 </tbody>
             </table>
