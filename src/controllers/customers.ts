@@ -1,38 +1,27 @@
 import express, { Request, Response } from 'express';
 import benchmarks from './benchmarks';
+import Customer from '../models/customer';
 
 const customers = express.Router();
 
-const customerData = [
-    {
-        id: 1,
-        name: 'Apple',
-    },
-    {
-        id: 2,
-        name: 'Zappos',
-    },
-];
 
 customers.get('/', (req: Request, res: Response) => {
-    //TODO load customers from database
-
-    res.send(customerData);
+    Customer.findAll().then(c =>res.send(c) );
 });
 
 customers.post('/', (req: Request, res: Response) => {
-    //TODO: create customer in database
-    
-    res.send({
-        id: Math.floor(Math.random() * 10000),
-        name: req.body.name,
-    });
+    const name = req.body.name;
+
+    Customer.create({
+        name: name
+    }). then( c => res.send(c));
+
 });
 
 customers.get('/:customerId', (req: Request, res: Response) => {
-    //TODO: load customers from database
+
     
-    res.send(customerData.find(c => c.id.toString() === req.params.id));
+    Customer.findOne({where: {id : req.params.id}}).then(c => res.send(c));
 });
 
 customers.use('/:customerId/benchmarks', benchmarks);
