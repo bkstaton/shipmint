@@ -1,8 +1,8 @@
-import React, { useState, ChangeEvent, ReactNode, ReactElement, useRef } from 'react';
+import React, { useState, ChangeEvent, ReactElement, useRef } from 'react';
 import DiscountPercentTable from './benchmark/DiscountPercentTable';
 import TotalsTable from './benchmark/TotalsTable';
 import AnnualizationTable from './benchmark/AnnualizationTable';
-import { RouteProps, RouteComponentProps } from 'react-router-dom';
+import { RouteComponentProps } from 'react-router-dom';
 import fetcher from '../fetcher';
 
 enum Tabs {
@@ -65,19 +65,19 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                         className={tab === Tabs.DiscountPercent ? 'is-active' : ''}
                         onClick={() => setTab(Tabs.DiscountPercent)}
                     >
-                        <a>Discount %</a>
+                        Discount %
                     </li>
                     <li
                         className={tab === Tabs.Totals ? 'is-active' : ''}
                         onClick={() => setTab(Tabs.Totals)}
                     >
-                        <a>Totals</a>
+                        Totals
                     </li>
                     <li
                         className={tab === Tabs.Annualization ? 'is-active' : ''}
                         onClick={() => setTab(Tabs.Annualization)}
                     >
-                        <a>Annualization</a>
+                        Annualization
                     </li>
                 </ul>
             </div>

@@ -1,7 +1,6 @@
 import express, { Request, Response } from 'express';
 
 import google from './google';
-import passport from 'passport';
 
 const auth = express.Router();
 

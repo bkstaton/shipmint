@@ -13,8 +13,8 @@ customers.post('/', (req: Request, res: Response) => {
     const name = req.body.name;
 
     Customer.create({
-        name: name
-    }). then( c => res.send(c));
+        name
+    }).then(c => res.send(c));
 
 });
 

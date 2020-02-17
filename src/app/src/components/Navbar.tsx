@@ -17,7 +17,7 @@ const Navbar = () => {
         <div className="navbar is-dark">
             <div className="navbar-brand">
                 <Link className="navbar-item" to="/">
-                    <img src="https://goshipmint.com/wp-content/uploads/2019/02/goshipmint-logo.png" />
+                    <img src="https://goshipmint.com/wp-content/uploads/2019/02/goshipmint-logo.png" alt="ShipMint" />
                 </Link>
             </div>
             <div className="navbar-menu">

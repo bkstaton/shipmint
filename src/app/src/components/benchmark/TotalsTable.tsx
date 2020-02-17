@@ -6,11 +6,11 @@ const TotalsTable = (props: { benchmarks: any[] }) => (
         <table className="table is-fullwidth is-striped is-hoverable">
             <thead>
                 <tr>
-                    <td>Method</td>
-                    <td>Weight</td>
-                    <td>Total Discount $</td>
-                    <td>Total Discount %</td>
-                    <td>Net Spend</td>
+                    <th>Method</th>
+                    <th>Weight</th>
+                    <th>Total Discount $</th>
+                    <th>Total Discount %</th>
+                    <th>Net Spend</th>
                 </tr>
             </thead>
             <tbody>

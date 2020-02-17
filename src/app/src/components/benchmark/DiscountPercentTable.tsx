@@ -6,13 +6,13 @@ const DiscountPercentTable = (props: { benchmarks: any[] }) => (
         <table className="table is-fullwidth is-striped is-hoverable">
             <thead>
                 <tr>
-                    <td>Method</td>
-                    <td>Weight</td>
-                    <td>Grace Discount</td>
-                    <td>Discount</td>
-                    <td>Earned Discount</td>
-                    <td>Performance Pricing</td>
-                    <td>Automation Discount</td>
+                    <th>Method</th>
+                    <th>Weight</th>
+                    <th>Grace Discount</th>
+                    <th>Discount</th>
+                    <th>Earned Discount</th>
+                    <th>Performance Pricing</th>
+                    <th>Automation Discount</th>
                 </tr>
             </thead>
             <tbody>

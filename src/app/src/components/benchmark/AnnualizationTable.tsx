@@ -6,9 +6,9 @@ const AnnualizationTable = (props: { benchmarks: any[] }) => (
         <table className="table is-fullwidth is-striped is-hoverable">
             <thead>
                 <tr>
-                    <td>Total Discount $</td>
-                    <td>Total Discount %</td>
-                    <td>Net Spend</td>
+                    <th>Total Discount $</th>
+                    <th>Total Discount %</th>
+                    <th>Net Spend</th>
                 </tr>
             </thead>
             <tbody>
