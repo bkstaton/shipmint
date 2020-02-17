@@ -12,8 +12,8 @@ function App() {
       <Layout>
         <Route path="/hello" render={() => <p>Hello, World!</p>} />
         <Route path="/login" component={Login} />
-        <Route path="/customers" component={Customers} />
-        <Route path="/customers/:id" component={Customer} />
+        <Route exact path="/customers" component={Customers} />
+        <Route exact path="/customers/:id" component={Customer} />
       </Layout>
     </Router>
   );

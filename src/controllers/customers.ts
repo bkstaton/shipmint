@@ -21,7 +21,7 @@ customers.post('/', (req: Request, res: Response) => {
 customers.get('/:customerId', (req: Request, res: Response) => {
 
     
-    Customer.findOne({where: {id : req.params.id}}).then(c => res.send(c));
+    Customer.findOne({where: {id : req.params.customerId}}).then(c => res.send(c));
 });
 
 customers.use('/:customerId/benchmarks', benchmarks);

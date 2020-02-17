@@ -10,7 +10,8 @@ const Customers = () => {
 
     return (
         <div className={`select ${isValidating ? 'is-loading' : ''}`}>
-            <select onChange={e => history.push(`/customers/{$e.target.value}`)}>
+            <select onChange={e => history.push(`/customers/${e.target.value}`)}>
+                <option  value="">Choose Company</option>
                 {customers && customers.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
         </div>
