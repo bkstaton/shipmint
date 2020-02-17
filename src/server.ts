@@ -35,13 +35,17 @@ app.use('/auth', auth);
 const api = express.Router();
 
 api.use('/user', requireAuth, user);
-api.use('/customers', customers);
+api.use('/customers', requireAuth, customers);
 
 app.use('/api', api);
 
 app.use(express.static(path.join(__dirname, 'app', 'build')));
 
-app.get('/*', (req: Request, res: Response) => {
+app.get('/login', (req: Request, res: Response) => {
+    res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
+});
+
+app.get('/*', requireAuth, (req: Request, res: Response) => {
     res.sendFile(path.join(__dirname, 'app', 'build', 'index.html'));
 });
 

@@ -13,12 +13,12 @@ benchmarks.post('/', (req: Request, res: Response) => {
     
     const report = req.files.report;
 
-    const benchmark = calculate(parseFedex(report.data));
+    const benchmarks = calculate(parseFedex(report.data));
 
     res.send({
-        customerId: req.body.customerId,
+        customerId: req.params.customerId,
         name: report.name,
-        benchmark,
+        benchmarks,
     });
 });
 

@@ -45,13 +45,14 @@ const fedexParse = (data: Buffer): Benchmark[] => {
     });
 
     const defaultRow = {
-        count: 0,
+        count: 0.0,
         transportationCharge: 0.0,
         graceDiscount: 0.0,
         discount: 0.0,
         earnedDiscount: 0.0,
         performancePricing: 0.0,
         automationDiscount: 0.0,
+        annualizationFactor: 0.0,
     };
 
     const benchmarks = [] as Benchmark[];
@@ -70,11 +71,11 @@ const fedexParse = (data: Buffer): Benchmark[] => {
             return;
         }
 
-        let benchmark = benchmarks.find(b => b.method === method && b.bucket === bucket);
+        let benchmark = benchmarks.find(b => b.method === method.toString() && b.bucket === bucket.toString());
         if (!benchmark) {
-            benchmark = new Benchmark({
-                method,
-                bucket,
+            benchmark = Benchmark.build({
+                method: method.toString(),
+                bucket: bucket.toString(),
                 ...defaultRow,
             });
 
@@ -98,19 +99,19 @@ const fedexParse = (data: Buffer): Benchmark[] => {
             }
             
             switch (row[i]) {
-                case DiscountType.GraceDiscount:
+                case DiscountType.GraceDiscount.toString():
                     benchmark.graceDiscount += parseCsvFloat(row[i+1]);
                     break;
-                case DiscountType.Discount:
+                case DiscountType.Discount.toString():
                     benchmark.discount += parseCsvFloat(row[i+1]);
                     break;
-                case DiscountType.EarnedDiscount:
+                case DiscountType.EarnedDiscount.toString():
                     benchmark.earnedDiscount += parseCsvFloat(row[i+1]);
                     break;
-                case DiscountType.PerformancePricing:
+                case DiscountType.PerformancePricing.toString():
                     benchmark.performancePricing += parseCsvFloat(row[i+1]);
                     break;
-                case DiscountType.AutomationDiscount:
+                case DiscountType.AutomationDiscount.toString():
                     benchmark.automationDiscount += parseCsvFloat(row[i+1]);
                     break;
             }
