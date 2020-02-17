@@ -23,26 +23,3 @@ export enum DiscountType {
     PerformancePricing = 'Performance Pricing',
     AutomationDiscount = 'Automation Discount',
 }
-
-export interface SummaryRow {
-    count: number;
-    transportationCharge: number;
-    graceDiscount: number;
-    discount: number;
-    earnedDiscount: number;
-    performancePricing: number;
-    automationDiscount: number;
-}
-
-export interface MethodSummary {
-    [bucket: string]: SummaryRow;
-}
-
-export interface Summary {
-    methods: {[method: string]: MethodSummary};
-    annualizationFactor: number;
-}
-
-export interface Benchmark {
-
-}

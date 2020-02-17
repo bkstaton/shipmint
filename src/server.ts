@@ -35,7 +35,7 @@ app.use('/auth', auth);
 const api = express.Router();
 
 api.use('/user', requireAuth, user);
-api.use('/customers', requireAuth, customers);
+api.use('/customers', customers);
 
 app.use('/api', api);
 

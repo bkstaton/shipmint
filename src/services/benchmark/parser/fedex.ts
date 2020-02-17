@@ -1,7 +1,8 @@
 import csv from 'csv-parse/lib/sync';
-import moment, { min } from 'moment';
+import moment from 'moment';
 
-import { WeightBucket, Summary, Method, DiscountType } from '../types';
+import { WeightBucket, Method, DiscountType } from '../types';
+import Benchmark from '../../../models/benchmark';
 
 export enum Columns {
     Method = 11,
@@ -37,7 +38,7 @@ const parseCsvFloat = (value: string): number => {
     return parseFloat(value.replace(/ /g, ''));
 };
 
-const fedexParse = (data: Buffer): Summary => {
+const fedexParse = (data: Buffer): Benchmark[] => {
     const rows: Array<string>[] = csv(data, {
         delimiter: ';',
         from_line: 2,
@@ -53,26 +54,7 @@ const fedexParse = (data: Buffer): Summary => {
         automationDiscount: 0.0,
     };
 
-    const defaultMethodSummary = {
-        [WeightBucket.OneToFivePounds.toString()]: { ...defaultRow },
-        [WeightBucket.SixToTenPounds.toString()]: { ...defaultRow },
-        [WeightBucket.ElevenToFifteenPounds.toString()]: { ...defaultRow },
-        [WeightBucket.SixteenToTwentyPounds.toString()]: { ...defaultRow },
-        [WeightBucket.TwentyOneToThirtyPounds.toString()]: { ...defaultRow },
-        [WeightBucket.ThirtyOneToFiftyPounds.toString()]: { ...defaultRow },
-        [WeightBucket.FiftyOneToSeventyPounds.toString()]: { ...defaultRow },
-        [WeightBucket.SeventyPlusPounds.toString()]: { ...defaultRow },
-    }
-
-    const summary: Summary = {
-        methods: {
-            [Method.Ground.toString()]: { ...defaultMethodSummary },
-            [Method.HomeDelivery.toString()]: { ...defaultMethodSummary },
-            [Method.SmartPost.toString()]: { ...defaultMethodSummary },
-            [Method.InternationalGround.toString()]: { ...defaultMethodSummary },
-        },
-        annualizationFactor: 1,
-    };
+    const benchmarks = [] as Benchmark[];
 
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
@@ -87,9 +69,20 @@ const fedexParse = (data: Buffer): Summary => {
         if (!bucket) {
             return;
         }
+
+        let benchmark = benchmarks.find(b => b.method === method && b.bucket === bucket);
+        if (!benchmark) {
+            benchmark = new Benchmark({
+                method,
+                bucket,
+                ...defaultRow,
+            });
+
+            benchmarks.push(benchmark);
+        }
         
-        summary.methods[method][bucket].count++;
-        summary.methods[method][bucket].transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        benchmark.count++;
+        benchmark.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {
@@ -106,27 +99,29 @@ const fedexParse = (data: Buffer): Summary => {
             
             switch (row[i]) {
                 case DiscountType.GraceDiscount:
-                    summary.methods[method][bucket].graceDiscount += parseCsvFloat(row[i+1]);
+                    benchmark.graceDiscount += parseCsvFloat(row[i+1]);
                     break;
                 case DiscountType.Discount:
-                    summary.methods[method][bucket].discount += parseCsvFloat(row[i+1]);
+                    benchmark.discount += parseCsvFloat(row[i+1]);
                     break;
                 case DiscountType.EarnedDiscount:
-                    summary.methods[method][bucket].earnedDiscount += parseCsvFloat(row[i+1]);
+                    benchmark.earnedDiscount += parseCsvFloat(row[i+1]);
                     break;
                 case DiscountType.PerformancePricing:
-                    summary.methods[method][bucket].performancePricing += parseCsvFloat(row[i+1]);
+                    benchmark.performancePricing += parseCsvFloat(row[i+1]);
                     break;
                 case DiscountType.AutomationDiscount:
-                    summary.methods[method][bucket].automationDiscount += parseCsvFloat(row[i+1]);
+                    benchmark.automationDiscount += parseCsvFloat(row[i+1]);
                     break;
             }
         }
     });
 
-    summary.annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+    for (let i in benchmarks) {
+        benchmarks[i].annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+    }
 
-    return summary;
+    return benchmarks;
 };
 
 export default fedexParse;
