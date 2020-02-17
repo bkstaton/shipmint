@@ -4,7 +4,6 @@ import {
 } from 'sequelize';
 
 import models from './index';
-import { Method, WeightBucket } from '../services/benchmark/types';
 
 class Benchmark extends Model {
   // Sequelize-managed fields
@@ -13,8 +12,8 @@ class Benchmark extends Model {
   public readonly updatedAt!: Date;
 
   // Custom fields
-  public method!: Method;
-  public bucket!: WeightBucket;
+  public method!: string;
+  public bucket!: string;
   public count!: number;
   public transportationCharge!: number;
   public graceDiscount!: number;
@@ -26,6 +25,39 @@ class Benchmark extends Model {
 };
 
 Benchmark.init({
+  method: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  bucket: {
+    type: DataTypes.STRING,
+    allowNull: false
+  },
+  count: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
+  transportationCharge: {
+    type: DataTypes.FLOAT
+  },
+  graceDiscount: {
+    type: DataTypes.FLOAT
+  },
+  discount: {
+    type: DataTypes.FLOAT
+  },
+  earnedDiscount: {
+    type: DataTypes.FLOAT
+  },
+  performancePricing: {
+    type: DataTypes.FLOAT
+  },
+  automationDiscount: {
+    type: DataTypes.FLOAT
+  },
+  annualizationFactor: {
+    type: DataTypes.FLOAT
+  },
 }, {
   tableName: 'benchmarks',
   sequelize: models,

@@ -14,6 +14,8 @@ interface FullBenchmark {
 const calculate = (benchmarks: Benchmark[]): FullBenchmark[] => {
     return benchmarks.map(b => {
         return {
+            method: b.method,
+            weightBucket: b.bucket,
             graceDiscountPercent: b.graceDiscount / b.transportationCharge,
             discountPercent: b.discount / b.transportationCharge,
             earnedDiscountPercent: b.earnedDiscount / b.transportationCharge,
