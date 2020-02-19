@@ -6,7 +6,10 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpileOnly ./src/server.ts",
     "build": "tsc",
-    "build-app": "npm run build --prefix src/app"
+    "build-app": "npm run build --prefix src/app",
+    "create-migration": "sequelize-cli migration:generate",
+    "migrate": "sequelize-cli db:migrate",
+    "rollback": "sequelize-cli db:migrate:undo"
   },
   "repository": {
     "type": "git",
@@ -34,6 +37,7 @@
     "@types/express-session": "^1.15.16",
     "@types/node": "^13.7.0",
     "@types/sequelize": "^4.28.8",
+    "sequelize-cli": "^5.5.1",
     "ts-node-dev": "^1.0.0-pre.44",
     "typescript": "^3.7.5"
   }
