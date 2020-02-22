@@ -2,7 +2,7 @@ import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
 import { WeightBucket, Method, DiscountType } from '../types';
-import Benchmark from '../../../models/benchmark';
+import { Benchmark } from '../../../models';
 
 export enum Columns {
     Method = 11,
@@ -98,23 +98,23 @@ const fedexParse = (data: Buffer): Benchmark[] => {
                 break;
             }
             
-            switch (row[i]) {
-                case DiscountType.GraceDiscount.toString():
-                    benchmark.graceDiscount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.Discount.toString():
-                    benchmark.discount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.EarnedDiscount.toString():
-                    benchmark.earnedDiscount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.PerformancePricing.toString():
-                    benchmark.performancePricing += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.AutomationDiscount.toString():
-                    benchmark.automationDiscount += parseCsvFloat(row[i+1]);
-                    break;
-            }
+            // switch (row[i]) {
+            //     case DiscountType.GraceDiscount.toString():
+            //         benchmark.graceDiscount += parseCsvFloat(row[i+1]);
+            //         break;
+            //     case DiscountType.Discount.toString():
+            //         benchmark.discount += parseCsvFloat(row[i+1]);
+            //         break;
+            //     case DiscountType.EarnedDiscount.toString():
+            //         benchmark.earnedDiscount += parseCsvFloat(row[i+1]);
+            //         break;
+            //     case DiscountType.PerformancePricing.toString():
+            //         benchmark.performancePricing += parseCsvFloat(row[i+1]);
+            //         break;
+            //     case DiscountType.AutomationDiscount.toString():
+            //         benchmark.automationDiscount += parseCsvFloat(row[i+1]);
+            //         break;
+            // }
         }
     });
 

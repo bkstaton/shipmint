@@ -9,7 +9,8 @@
     "build-app": "npm run build --prefix src/app",
     "create-migration": "sequelize-cli migration:generate",
     "migrate": "sequelize-cli db:migrate",
-    "rollback": "sequelize-cli db:migrate:undo"
+    "rollback": "sequelize-cli db:migrate:undo",
+    "cli": "docker exec -it app_app_1 /bin/sh"
   },
   "repository": {
     "type": "git",
