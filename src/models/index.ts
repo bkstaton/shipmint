@@ -71,6 +71,11 @@ class Discount extends Model {
 // Initialization 
 
 User.init({
+    id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     name: {
         type: DataTypes.STRING,
     },
@@ -86,6 +91,11 @@ User.init({
 });
 
 Customer.init({
+    id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     name: {
         type: DataTypes.STRING,
         allowNull: false
@@ -96,6 +106,11 @@ Customer.init({
 });
 
 Benchmark.init({
+    id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     method: {
         type: DataTypes.STRING,
         allowNull: false
@@ -120,6 +135,11 @@ Benchmark.init({
 });
 
 Discount.init({
+    id: {
+        type: DataTypes.BIGINT,
+        autoIncrement: true,
+        primaryKey: true,
+    },
     method: {
         type: DataTypes.STRING,
     },
