@@ -49,11 +49,20 @@ class Benchmark extends Model {
 
     // Custom fields
     public customerId!: number;
-    public method!: string;
-    public bucket!: string;
     public count!: number;
     public transportationCharge!: number;
     public annualizationFactor!: number;
+
+    // Relationships
+    public getDiscounts!: HasManyGetAssociationsMixin<Discount>;
+    public addDiscount!: HasManyAddAssociationMixin<Discount, number>;
+    public hasDiscount!: HasManyHasAssociationMixin<Discount, number>;
+    public countDiscounts!: HasManyCountAssociationsMixin;
+    public createDiscount!: HasManyCreateAssociationMixin<Discount>;
+
+    public static associations: {
+        discounts: Association<Benchmark, Discount>;
+    };
 };
 
 class Discount extends Model {
@@ -63,8 +72,10 @@ class Discount extends Model {
     public readonly updatedAt!: Date;
 
     // Custom fields
+    public benchmarkId!: number;
     public method!: string;
     public bucket!: string;
+    public type!: string;
     public amount!: number;
 }
 
@@ -72,18 +83,15 @@ class Discount extends Model {
 
 User.init({
     id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
     },
-    name: {
-        type: DataTypes.STRING,
-    },
-    email: {
-        type: DataTypes.STRING,
-    },
+    name: DataTypes.STRING,
+    email: DataTypes.STRING,
     googleId: {
         type: DataTypes.STRING,
+        allowNull: true,
     },
 }, {
     tableName: 'users',
@@ -92,7 +100,7 @@ User.init({
 
 Customer.init({
     id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
     },
@@ -107,27 +115,22 @@ Customer.init({
 
 Benchmark.init({
     id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
     },
-    method: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    bucket: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
+    customerId: DataTypes.BIGINT.UNSIGNED,
     count: {
         type: DataTypes.INTEGER,
-        defaultValue: 0
+        defaultValue: 0,
     },
     transportationCharge: {
-        type: DataTypes.FLOAT
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
     },
     annualizationFactor: {
-        type: DataTypes.FLOAT
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
     },
 }, {
     tableName: 'benchmarks',
@@ -136,18 +139,17 @@ Benchmark.init({
 
 Discount.init({
     id: {
-        type: DataTypes.BIGINT,
+        type: DataTypes.BIGINT.UNSIGNED,
         autoIncrement: true,
         primaryKey: true,
     },
-    method: {
-        type: DataTypes.STRING,
-    },
-    bucket: {
-        type: DataTypes.STRING,
-    },
+    benchmarkId: DataTypes.BIGINT.UNSIGNED,
+    method: DataTypes.STRING,
+    bucket: DataTypes.STRING,
+    type: DataTypes.STRING,
     amount: {
         type: DataTypes.FLOAT,
+        defaultValue: 0,
     },
 }, {
     tableName: 'discounts',
@@ -161,6 +163,14 @@ Customer.hasMany(Benchmark, {
 });
 
 Benchmark.belongsTo(Customer, { targetKey: 'id' });
+
+Benchmark.hasMany(Discount, {
+    sourceKey: 'id',
+    foreignKey: 'benchmarkId',
+    as: 'discounts'
+});
+
+Discount.belongsTo(Benchmark, { targetKey: 'id' });
 
 export {
     User,

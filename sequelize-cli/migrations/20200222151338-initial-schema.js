@@ -2,11 +2,16 @@
 
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryIterface.sequelize.transaction(t =>
+    return queryInterface.sequelize.transaction(t =>
       Promise.all([
         queryInterface.createTable(
           'users', {
-            id: Sequelize.BIGINT.UNSIGNED,
+            id: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              primaryKey: true,
+              autoIncrement: true,
+              allowNull: false,
+            },
             name: Sequelize.STRING(255),
             email: Sequelize.STRING(255),
             googleId: Sequelize.STRING(255),
@@ -18,7 +23,12 @@ module.exports = {
         ),
         queryInterface.createTable(
           'customers', {
-            id: Sequelize.BIGINT.UNSIGNED,
+            id: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              primaryKey: true,
+              autoIncrement: true,
+              allowNull: false,
+            },
             name: Sequelize.STRING(255),
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE,
@@ -28,7 +38,12 @@ module.exports = {
         ),
         queryInterface.createTable(
           'benchmarks', {
-            id: Sequelize.BIGINT.UNSIGNED,
+            id: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              primaryKey: true,
+              autoIncrement: true,
+              allowNull: false,
+            },
             customerId: {
               type: Sequelize.BIGINT.UNSIGNED,
               references: {
@@ -50,7 +65,12 @@ module.exports = {
         ),
         queryInterface.createTable(
           'discounts', {
-            id: Sequelize.BIGINT.UNSIGNED,
+            id: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              primaryKey: true,
+              autoIncrement: true,
+              allowNull: false,
+            },
             benchmarkId: {
               type: Sequelize.BIGINT.UNSIGNED,
               references: {
@@ -60,10 +80,12 @@ module.exports = {
                 key: 'id'
               },
             },
-            discountType: Sequelize.STRING(255),
+            type: Sequelize.STRING(255),
             method: Sequelize.STRING(255),
             bucket: Sequelize.STRING(255),
             amount: Sequelize.FLOAT,
+            createdAt: Sequelize.DATE,
+            updatedAt: Sequelize.DATE,
           }, {
             transaction: t
           }
