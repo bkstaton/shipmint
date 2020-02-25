@@ -12,9 +12,11 @@ benchmarks.post('/', (req: Request, res: Response) => {
         return;
     }
 
+    const customerId = req.params.customerId;
+
     const report = req.files.report;
 
-    parseFedex(report.data).then(benchmark => {
+    parseFedex(customerId, report.data).then(benchmark => {
         calculate(benchmark).then(result => res.send(result));
     }).catch(e => res.status(500).send(e));
 });

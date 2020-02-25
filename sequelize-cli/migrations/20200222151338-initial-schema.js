@@ -54,8 +54,6 @@ module.exports = {
               },
             },
             file: Sequelize.STRING(255),
-            count: Sequelize.INTEGER.UNSIGNED,
-            transportationCharge: Sequelize.FLOAT,
             annualizationFactor: Sequelize.FLOAT,
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE,
@@ -64,7 +62,7 @@ module.exports = {
           }
         ),
         queryInterface.createTable(
-          'discounts', {
+          'benchmark_totals', {
             id: {
               type: Sequelize.BIGINT.UNSIGNED,
               primaryKey: true,
@@ -80,14 +78,39 @@ module.exports = {
                 key: 'id'
               },
             },
-            type: Sequelize.STRING(255),
             method: Sequelize.STRING(255),
             bucket: Sequelize.STRING(255),
+            count: Sequelize.INTEGER.UNSIGNED,
+            transportationCharge: Sequelize.FLOAT,
+            createdAt: Sequelize.DATE,
+            updatedAt: Sequelize.DATE,
+          }, {
+            transaction: t,
+          }
+        ),
+        queryInterface.createTable(
+          'benchmark_discounts', {
+            id: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              primaryKey: true,
+              autoIncrement: true,
+              allowNull: false,
+            },
+            benchmarkTotalId: {
+              type: Sequelize.BIGINT.UNSIGNED,
+              references: {
+                model: {
+                  tableName: 'benchmark_totals',
+                },
+                key: 'id'
+              },
+            },
+            type: Sequelize.STRING(255),
             amount: Sequelize.FLOAT,
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE,
           }, {
-            transaction: t
+            transaction: t,
           }
         ),
       ])
@@ -96,7 +119,10 @@ module.exports = {
 
   down: (queryInterface, Sequelize) => {
     return queryInterface.sequelize.transaction(t => Promise.all([
-      queryInterface.dropTable('discounts', {
+      queryInterface.dropTable('benchmark_discounts', {
+        transaction: t
+      }),
+      queryInterface.dropTable('benchmark_totals', {
         transaction: t
       }),
       queryInterface.dropTable('benchmarks', {

@@ -2,7 +2,7 @@ import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
 import { WeightBucket, Method, DiscountType } from '../types';
-import { Benchmark, Discount } from '../../../models';
+import { Benchmark, BenchmarkDiscount, BenchmarkTotal } from '../../../models';
 
 export enum Columns {
     Method = 11,
@@ -38,13 +38,15 @@ const parseCsvFloat = (value: string): number => {
     return parseFloat(value.replace(/ /g, ''));
 };
 
-const fedexParse = async (data: Buffer): Promise<Benchmark> => {
+const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> => {
     const rows: Array<string>[] = csv(data, {
         delimiter: ';',
         from_line: 2,
     });
 
-    const benchmark = await Benchmark.create();
+    const benchmark = await Benchmark.create({
+        customerId
+    });
 
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
@@ -60,8 +62,16 @@ const fedexParse = async (data: Buffer): Promise<Benchmark> => {
             continue;
         }
 
-        benchmark.count++;
-        benchmark.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        const [ total, created ] = await BenchmarkTotal.findOrCreate({
+            where: {
+                benchmarkId: benchmark.id,
+                method: method.toString(),
+                bucket: bucket.toString(),
+            }
+        });
+
+        total.count++;
+        total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {
@@ -82,11 +92,9 @@ const fedexParse = async (data: Buffer): Promise<Benchmark> => {
                 continue;
             }
 
-            const [ discount, created ] = await Discount.findOrCreate({
+            const [ discount, created ] = await BenchmarkDiscount.findOrCreate({
                 where: {
-                    benchmarkId: benchmark.id,
-                    method: method.toString(),
-                    bucket: bucket.toString(),
+                    benchmarkTotalId: total.id,
                     type: row[i],
                 }
             });

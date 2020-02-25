@@ -49,23 +49,22 @@ class Benchmark extends Model {
 
     // Custom fields
     public customerId!: number;
-    public count!: number;
-    public transportationCharge!: number;
     public annualizationFactor!: number;
 
     // Relationships
-    public getDiscounts!: HasManyGetAssociationsMixin<Discount>;
-    public addDiscount!: HasManyAddAssociationMixin<Discount, number>;
-    public hasDiscount!: HasManyHasAssociationMixin<Discount, number>;
-    public countDiscounts!: HasManyCountAssociationsMixin;
-    public createDiscount!: HasManyCreateAssociationMixin<Discount>;
+    public getTotals!: HasManyGetAssociationsMixin<BenchmarkTotal>;
+    public addTotal!: HasManyAddAssociationMixin<BenchmarkTotal, number>;
+    public hasTotal!: HasManyHasAssociationMixin<BenchmarkTotal, number>;
+    public countTotals!: HasManyCountAssociationsMixin;
+    public createTotal!: HasManyCreateAssociationMixin<BenchmarkTotal>;
 
     public static associations: {
-        discounts: Association<Benchmark, Discount>;
+        totals: Association<Benchmark, BenchmarkTotal>;
+        discounts: Association<Benchmark, BenchmarkDiscount>;
     };
-};
+}
 
-class Discount extends Model {
+class BenchmarkTotal extends Model {
     // Sequelize-managed fields
     public readonly id!: number;
     public readonly createdAt!: Date;
@@ -75,6 +74,24 @@ class Discount extends Model {
     public benchmarkId!: number;
     public method!: string;
     public bucket!: string;
+    public count!: number;
+    public transportationCharge!: number;
+
+    public getDiscounts!: HasManyGetAssociationsMixin<BenchmarkDiscount>;
+    public addDiscount!: HasManyAddAssociationMixin<BenchmarkDiscount, number>;
+    public hasDiscount!: HasManyHasAssociationMixin<BenchmarkDiscount, number>;
+    public countDiscounts!: HasManyCountAssociationsMixin;
+    public createDiscount!: HasManyCreateAssociationMixin<BenchmarkDiscount>;
+}
+
+class BenchmarkDiscount extends Model {
+    // Sequelize-managed fields
+    public readonly id!: number;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    // Custom fields
+    public benchmarkTotalId!: number;
     public type!: string;
     public amount!: number;
 }
@@ -120,14 +137,7 @@ Benchmark.init({
         primaryKey: true,
     },
     customerId: DataTypes.BIGINT.UNSIGNED,
-    count: {
-        type: DataTypes.INTEGER,
-        defaultValue: 0,
-    },
-    transportationCharge: {
-        type: DataTypes.FLOAT,
-        defaultValue: 0,
-    },
+    file: DataTypes.STRING,
     annualizationFactor: {
         type: DataTypes.FLOAT,
         defaultValue: 0,
@@ -137,7 +147,7 @@ Benchmark.init({
     sequelize,
 });
 
-Discount.init({
+BenchmarkTotal.init({
     id: {
         type: DataTypes.BIGINT.UNSIGNED,
         autoIncrement: true,
@@ -146,13 +156,33 @@ Discount.init({
     benchmarkId: DataTypes.BIGINT.UNSIGNED,
     method: DataTypes.STRING,
     bucket: DataTypes.STRING,
+    count: {
+        type: DataTypes.INTEGER.UNSIGNED,
+        defaultValue: 0,
+    },
+    transportationCharge: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
+}, {
+    tableName: 'benchmark_totals',
+    sequelize,
+});
+
+BenchmarkDiscount.init({
+    id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    benchmarkTotalId: DataTypes.BIGINT.UNSIGNED,
     type: DataTypes.STRING,
     amount: {
         type: DataTypes.FLOAT,
         defaultValue: 0,
     },
 }, {
-    tableName: 'discounts',
+    tableName: 'benchmark_discounts',
     sequelize,
 });
 
@@ -164,19 +194,28 @@ Customer.hasMany(Benchmark, {
 
 Benchmark.belongsTo(Customer, { targetKey: 'id' });
 
-Benchmark.hasMany(Discount, {
+Benchmark.hasMany(BenchmarkTotal, {
     sourceKey: 'id',
     foreignKey: 'benchmarkId',
+    as: 'totals'
+});
+
+BenchmarkTotal.belongsTo(Benchmark, { targetKey: 'id' });
+
+BenchmarkTotal.hasMany(BenchmarkDiscount, {
+    sourceKey: 'id',
+    foreignKey: 'benchmarkTotalId',
     as: 'discounts'
 });
 
-Discount.belongsTo(Benchmark, { targetKey: 'id' });
+BenchmarkDiscount.belongsTo(BenchmarkTotal, { targetKey: 'id' });
 
 export {
     User,
     Customer,
     Benchmark,
-    Discount,
+    BenchmarkTotal,
+    BenchmarkDiscount,
 }
 
 export default sequelize;

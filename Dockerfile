@@ -2,11 +2,12 @@ FROM node:lts-alpine as backend
 
 WORKDIR /srv
 
-COPY .sequelizerc /srv/
-COPY sequelize-cli /srv/sequelize-cli/
 COPY package.json /srv/
 COPY package-lock.json /srv/
 RUN npm install
+
+COPY .sequelizerc /srv/
+COPY sequelize-cli /srv/sequelize-cli/
 
 COPY tsconfig.json /srv/
 

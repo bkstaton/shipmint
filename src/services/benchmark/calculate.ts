@@ -14,40 +14,23 @@ interface CalculatedMethod {
     netSpend: number;
 }
 
-const calculate = (benchmark: Benchmark): Promise<CalculatedMethod[]> => {
-    return benchmark.getDiscounts().then(discounts => {
-        const groupedDiscounts = discounts.reduce((result, discount) => {
-            const key = `${discount.method}-${discount.bucket}`;
+const calculate = async (benchmark: Benchmark): Promise<CalculatedMethod[]> => {
+    const totals = await benchmark.getTotals();
 
-            let { amount, type, ...other } = discount;
+    return Promise.all(Object.values(totals).map(async total => {
+        const discounts = await total.getDiscounts();
 
-            result[key] = result[key] || {
-                discounts: [],
-                ...other,
-            };
+        const discountTotal = discounts.reduce((total, d) => total + d.amount, 0);
 
-            result[key].discounts.push({ type, amount });
-
-            return result;
-        }, {} as {
-            [key: string]: {
-                method: string,
-                bucket: string,
-                discounts: Array<{ type: string, amount: number }>,
-            }
-        });
-
-        return Object.values(groupedDiscounts).map(g => {
-            return {
-                method: g.method,
-                bucket: g.bucket,
-                discounts: g.discounts.map(d => { return { type: d.type, amount: d.amount / benchmark.transportationCharge }; }),
-                totalDiscountMoney: g.discounts.reduce((total, d) => total + d.amount, 0),
-                totalDiscountPercent: g.discounts.reduce((total, d) => total + d.amount, 0) / benchmark.transportationCharge,
-                netSpend: g.discounts.reduce((total, d) => total + d.amount, 0) + benchmark.transportationCharge,
-            };
-        });
-    });
+        return {
+            method: total.method,
+            bucket: total.bucket,
+            discounts: discounts.map(d => { return { type: d.type, amount: d.amount / total.transportationCharge }; }),
+            totalDiscountMoney: discountTotal,
+            totalDiscountPercent: discountTotal / total.transportationCharge,
+            netSpend: discountTotal + total.transportationCharge,
+        };
+    }));
 };
 
 export default calculate;
