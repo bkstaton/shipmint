@@ -2,7 +2,7 @@ import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
 import { WeightBucket, Method, DiscountType } from '../types';
-import Benchmark from '../../../models/benchmark';
+import { Benchmark, BenchmarkDiscount, BenchmarkTotal } from '../../../models';
 
 export enum Columns {
     Method = 11,
@@ -38,52 +38,40 @@ const parseCsvFloat = (value: string): number => {
     return parseFloat(value.replace(/ /g, ''));
 };
 
-const fedexParse = (data: Buffer): Benchmark[] => {
+const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> => {
     const rows: Array<string>[] = csv(data, {
         delimiter: ';',
         from_line: 2,
     });
 
-    const defaultRow = {
-        count: 0.0,
-        transportationCharge: 0.0,
-        graceDiscount: 0.0,
-        discount: 0.0,
-        earnedDiscount: 0.0,
-        performancePricing: 0.0,
-        automationDiscount: 0.0,
-        annualizationFactor: 0.0,
-    };
-
-    const benchmarks = [] as Benchmark[];
+    const benchmark = await Benchmark.create({
+        customerId
+    });
 
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
 
-    rows.forEach((row) => {
+    for (let row of rows) {
         const method = row[Columns.Method];
         if (!Object.keys(Method).includes(method)) {
-            return;
+            continue;
         }
 
         const bucket = getBucket(parseFloat(row[Columns.Weight]));
         if (!bucket) {
-            return;
+            continue;
         }
 
-        let benchmark = benchmarks.find(b => b.method === method.toString() && b.bucket === bucket.toString());
-        if (!benchmark) {
-            benchmark = Benchmark.build({
+        const [ total, created ] = await BenchmarkTotal.findOrCreate({
+            where: {
+                benchmarkId: benchmark.id,
                 method: method.toString(),
                 bucket: bucket.toString(),
-                ...defaultRow,
-            });
+            }
+        });
 
-            benchmarks.push(benchmark);
-        }
-        
-        benchmark.count++;
-        benchmark.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        total.count++;
+        total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {
@@ -93,36 +81,35 @@ const fedexParse = (data: Buffer): Benchmark[] => {
             maxDate = shipmentDate;
         }
 
-        for (let i = Columns.FirstDiscountStart;i < row.length;i += 2) {
+        for (let i = Columns.FirstDiscountStart; i < row.length; i += 2) {
+            // If the name is empty, we've reached the end of this row
             if (!row[i].length) {
                 break;
             }
-            
-            switch (row[i]) {
-                case DiscountType.GraceDiscount.toString():
-                    benchmark.graceDiscount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.Discount.toString():
-                    benchmark.discount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.EarnedDiscount.toString():
-                    benchmark.earnedDiscount += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.PerformancePricing.toString():
-                    benchmark.performancePricing += parseCsvFloat(row[i+1]);
-                    break;
-                case DiscountType.AutomationDiscount.toString():
-                    benchmark.automationDiscount += parseCsvFloat(row[i+1]);
-                    break;
-            }
-        }
-    });
 
-    for (let i in benchmarks) {
-        benchmarks[i].annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+            // If the name is not a valid discount type, skip it
+            if (!Object.values(DiscountType).includes(row[i] as DiscountType)) {
+                continue;
+            }
+
+            const [ discount, created ] = await BenchmarkDiscount.findOrCreate({
+                where: {
+                    benchmarkTotalId: total.id,
+                    type: row[i],
+                }
+            });
+
+            discount.amount += parseCsvFloat(row[i+1]);
+
+            await discount.save();
+        }
     }
 
-    return benchmarks;
+    benchmark.annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+
+    await benchmark.save();
+
+    return benchmark;
 };
 
 export default fedexParse;

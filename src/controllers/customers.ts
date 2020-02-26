@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import benchmarks from './benchmarks';
-import Customer from '../models/customer';
+import { Customer } from '../models';
 
 const customers = express.Router();
 

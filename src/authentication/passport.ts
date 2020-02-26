@@ -1,6 +1,6 @@
 import passport from 'passport';
 import google from 'passport-google-oauth20';
-import User from '../models/user';
+import { User } from '../models';
 
 passport.serializeUser((user, done) => done(null, user));
 
