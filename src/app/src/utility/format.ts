@@ -1,11 +1,14 @@
-const formatPercentage = (value?: number): string => {
-    if (value == undefined) {
-        return '';
-    }
-
+const formatPercentage = (value: number): string => {
     const percentage = value * 100;
 
     return percentage.toFixed(2) + ' %';
 };
 
-export { formatPercentage };
+const formatDollar = (value: number): string => {
+    return '$ ' + value.toFixed(2);
+}
+
+export {
+    formatPercentage,
+    formatDollar,
+};
