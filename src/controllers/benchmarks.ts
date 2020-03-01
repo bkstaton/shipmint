@@ -6,6 +6,12 @@ import { Benchmark } from '../models';
 
 const benchmarks = express.Router({ mergeParams: true });
 
+benchmarks.get('/', (req: Request, res: Response) => {
+    const customerId = req.params.customerId;
+
+    Benchmark.findAll({ where: { customerId }}).then(benchmarks => res.send(benchmarks)).catch(e => res.status(500).send(e));
+});
+
 benchmarks.post('/', (req: Request, res: Response) => {
     if (!req.files || !req.files.report || Array.isArray(req.files.report)) {
         res.status(400).send('Single report file is required.');
@@ -17,7 +23,7 @@ benchmarks.post('/', (req: Request, res: Response) => {
     const report = req.files.report;
 
     parseFedex(customerId, report.data).then(benchmark => {
-        calculate(benchmark).then(result => res.send(result));
+        calculate(benchmark).then(result => res.send(result)).catch(e => res.status(500).send(e));
     }).catch(e => res.status(500).send(e));
 });
 

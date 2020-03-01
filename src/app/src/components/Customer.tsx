@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { RouteComponentProps, useHistory } from 'react-router-dom';
 import useSWR from 'swr';
 import fetcher from '../fetcher';
+import BenchmarkUploadModal from './BenchmarkUploadModal';
 
 const Customer = (props: RouteComponentProps<{id: string}>) => {
     const { data: customer } = useSWR<any>(`/api/customers/${props.match.params.id}`, fetcher);
+    const { data: benchmarks } = useSWR(`/api/customers/${props.match.params.id}/benchmarks`, fetcher);
+
+    const [ uploadModalActive, setUploadModalActive ] = useState(false);
 
     const history = useHistory();
 
@@ -12,24 +16,25 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
         <section className="section">
             <h1 className="title">{customer && customer.name}</h1>
             <h2 className="subtitle">Reports</h2>
-            <table className="table">
+            <table className="table is-fullwidth is-hoverable">
                 <thead>
                     <tr>
                         <th>Date</th>
-                        <th>Type</th>
                         <th>File</th>
                         <th>
-                            <button type="button" className="button is-primary">Upload...</button>
-                            <input className="input is-hidden" type="file" />
+                            <button type="button" className="button is-primary" onClick={() => setUploadModalActive(true)}>Upload...</button>
+                            <BenchmarkUploadModal customerId={props.match.params.id} isActive={uploadModalActive} onClose={() => setUploadModalActive(false)} />
                         </th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr onClick={() => history.push(`/customers/${props.match.params.id}/benchmarks/1`)}>
-                        <td>02/16/2020</td>
-                        <td>Benchmark</td>
-                        <td><button type="button" className="button is-text">some-file.csv</button></td>
-                    </tr>
+                    {benchmarks && benchmarks.length && benchmarks.map((b: any) => (
+                        <tr onClick={() => history.push(`/customers/${props.match.params.id}/benchmarks/${b.id}`)}>
+                            <td>{b.createdAt}</td>
+                            <td><a href="https://aws.amazon.com/s3/" target="_blank">{b.file}</a></td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    ))}
                 </tbody>
             </table>
         </section>

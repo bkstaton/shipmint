@@ -72,6 +72,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
         total.count++;
         total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        await total.save();
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {
