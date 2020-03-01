@@ -1,90 +1,50 @@
-import React, { useState, ChangeEvent, ReactElement, useRef } from 'react';
-import DiscountPercentTable from './benchmark/DiscountPercentTable';
+import React, { useState, ReactElement } from 'react';
+import { RouteComponentProps } from 'react-router-dom';
+import useSWR from 'swr';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faSpinner } from '@fortawesome/free-solid-svg-icons';
+
+import DiscountTable from './benchmark/DiscountTable';
 import TotalsTable from './benchmark/TotalsTable';
 import AnnualizationTable from './benchmark/AnnualizationTable';
-import { RouteComponentProps } from 'react-router-dom';
 import fetcher from '../fetcher';
 
 enum Tabs {
-    DiscountPercent,
-    Totals,
+    Discount,
     Annualization,
 }
 
 const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId: string }>) => {
-    const [tab, setTab] = useState(Tabs.DiscountPercent);
-    const [benchmarks, setBenchmarks] = useState(null as any);
+    const [tab, setTab] = useState(Tabs.Discount);
 
-    const fileRef = useRef<HTMLInputElement>(null);
-
-    const uploadFile = (e: ChangeEvent<HTMLInputElement>) => {
-        if (!fileRef.current || !fileRef.current.files) {
-            return;
-        }
-
-        let formData = new FormData();
-        formData.append('report', fileRef.current.files[0]);
-
-        fetcher(
-            `/api/customers/${props.match.params.customerId}/benchmarks`,
-            {
-                method: 'POST',
-                body: formData,
-            }
-        ).then((data) => {
-            setBenchmarks(data.benchmarks);
-        });
-    };
-
-    let tabComponent: ReactElement | null = null;
-    switch (tab) {
-        case Tabs.DiscountPercent:
-            tabComponent = <DiscountPercentTable benchmarks={benchmarks} />;
-            break;
-        case Tabs.Totals:
-            tabComponent = <TotalsTable benchmarks={benchmarks} />;
-            break;
-        case Tabs.Annualization:
-            tabComponent = <AnnualizationTable benchmarks={benchmarks} />;
-            break;
-    }
+    const { data: benchmark, isValidating } = useSWR(`/api/customers/${props.match.params.customerId}/benchmarks/${props.match.params.benchmarkId}`, fetcher);
 
     return (
         <section className="section">
             <h1 className="title">Benchmark</h1>
-            <div className="field">
-                <label className="label">Upload File</label>
-                <div className="control">
-                    <input className="input" type="file" ref={fileRef} onChange={uploadFile} />
-                </div>
-            </div>
-
             <div className="tabs">
                 <ul>
                     <li
-                        className={tab === Tabs.DiscountPercent ? 'is-active' : ''}
-                        onClick={() => setTab(Tabs.DiscountPercent)}
+                        className={tab === Tabs.Discount ? 'is-active' : ''}
+                        onClick={() => setTab(Tabs.Discount)}
                     >
-                        Discount %
-                    </li>
-                    <li
-                        className={tab === Tabs.Totals ? 'is-active' : ''}
-                        onClick={() => setTab(Tabs.Totals)}
-                    >
-                        Totals
+                        <a>Discount %</a>
                     </li>
                     <li
                         className={tab === Tabs.Annualization ? 'is-active' : ''}
                         onClick={() => setTab(Tabs.Annualization)}
                     >
-                        Annualization
+                        <a>Annualization</a>
                     </li>
                 </ul>
             </div>
-
-            <div className="container">
-                {tabComponent || null}
-            </div>
+            {isValidating
+                ? <FontAwesomeIcon icon={faSpinner} />
+                : <>
+                    <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTable benchmark={benchmark} /></div>
+                    <div className={tab === Tabs.Annualization ? '' : 'is-hidden'}><AnnualizationTable benchmark={benchmark} /></div>
+                </>
+            }
         </section>
     );
 };
