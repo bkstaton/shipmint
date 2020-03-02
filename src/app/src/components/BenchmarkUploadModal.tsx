@@ -40,15 +40,17 @@ const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
         <div className={`modal ${isActive ? 'is-active' : ''}`}>
             <div className="modal-background" onClick={onClose}></div>
             <div className="modal-content">
-                <form onSubmit={(e) => { e.preventDefault(); uploadFile(); }}>
-                    <div className="field">
-                        <label className="label">CSV</label>
-                        <div className="control">
-                            <input className="input" ref={fileRef} type="file" />
+                <div className="box">
+                    <form onSubmit={(e) => { e.preventDefault(); uploadFile(); }}>
+                        <div className="field">
+                            <label className="label">CSV</label>
+                            <div className="control">
+                                <input className="input" ref={fileRef} type="file" />
+                            </div>
                         </div>
-                    </div>
-                    <button className={`button ${loading ? 'is-loading' : ''}`}>Upload</button>
-                </form>
+                        <button className={`button ${loading ? 'is-loading' : ''}`}>Upload</button>
+                    </form>
+                </div>
             </div>
             <button className="modal-close is-large" aria-label="close" onClick={onClose}></button>
         </div>
