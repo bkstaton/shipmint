@@ -42,7 +42,7 @@ benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {
             return;
         }
 
-        calculate(benchmark).then(result => res.send(result));
+        calculate(benchmark).then(result => res.send(result)).catch(e => res.status(500).send(e));
     });
 });
 

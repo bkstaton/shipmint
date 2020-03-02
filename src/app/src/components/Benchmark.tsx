@@ -28,7 +28,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                         className={tab === Tabs.Discount ? 'is-active' : ''}
                         onClick={() => setTab(Tabs.Discount)}
                     >
-                        <a>Discount %</a>
+                        <a>Discounts</a>
                     </li>
                     <li
                         className={tab === Tabs.Annualization ? 'is-active' : ''}
