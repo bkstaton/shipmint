@@ -11,7 +11,6 @@ function App() {
   return (
     <Router>
       <Layout>
-        <Route path="/hello" render={() => <p>Hello, World!</p>} />
         <Route path="/login" component={Login} />
         <Route exact path="/customers" component={Customers} />
         <Route exact path="/customers/:id" component={Customer} />
