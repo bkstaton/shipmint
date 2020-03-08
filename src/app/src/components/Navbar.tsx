@@ -1,7 +1,8 @@
-import * as React from 'react';
+import React from 'react';
+import { Link } from 'react-router-dom';
 import useSWR, { mutate } from 'swr';
 import fetcher from '../fetcher';
-import { Link } from 'react-router-dom';
+import logo from '../images/logo.png';
 
 const Navbar = () => {
     const { data: user } = useSWR(
@@ -17,7 +18,7 @@ const Navbar = () => {
         <div className="navbar is-dark">
             <div className="navbar-brand">
                 <Link className="navbar-item" to="/">
-                    <img src="https://goshipmint.com/wp-content/uploads/2019/02/goshipmint-logo.png" alt="ShipMint" />
+                    <img src={logo} alt="ShipMint" />
                 </Link>
             </div>
             <div className="navbar-menu">
