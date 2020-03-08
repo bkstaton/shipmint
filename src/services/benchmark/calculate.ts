@@ -31,6 +31,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
             bucket: total.bucket,
             discounts: discounts.map(d => { return { type: d.type, amount: d.amount }; }),
             transportationCharge: total.transportationCharge,
+            targetDiscount: total.targetDiscount,
         };
     }));
 

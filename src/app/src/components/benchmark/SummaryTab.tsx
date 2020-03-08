@@ -16,8 +16,6 @@ const SummaryTab = (props: { benchmark: any }) => {
 
             const targetNetCharge = total.transportationCharge * (1 - (total.targetDiscount / 100 || 0));
 
-            console.log(targetNetCharge);
-
             return {
                 transportationCharge: charges.transportationCharge + total.transportationCharge,
                 totalDiscount: charges.totalDiscount + totalDiscount,
