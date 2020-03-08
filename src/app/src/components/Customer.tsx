@@ -3,6 +3,7 @@ import { RouteComponentProps, useHistory } from 'react-router-dom';
 import useSWR from 'swr';
 import fetcher from '../fetcher';
 import BenchmarkUploadModal from './BenchmarkUploadModal';
+import Breadcrumb from './Breadcrumb';
 
 const Customer = (props: RouteComponentProps<{id: string}>) => {
     const { data: customer } = useSWR<any>(`/api/customers/${props.match.params.id}`, fetcher);
@@ -12,8 +13,14 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
 
     const history = useHistory();
 
+    const breadcrumbs = [
+        { path: '/customers', name: 'Customers' },
+        { path: `/customers/${props.match.params.id}`, name: props.match.params.id },
+    ];
+
     return (
         <section className="section">
+            <Breadcrumb breadcrumbs={breadcrumbs} />
             <h1 className="title">{customer && customer.name}</h1>
             <h2 className="subtitle">Reports</h2>
             <table className="table is-fullwidth is-hoverable">

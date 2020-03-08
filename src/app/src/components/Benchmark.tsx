@@ -5,9 +5,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 import DiscountTable from './benchmark/DiscountTable';
-import TotalsTable from './benchmark/TotalsTable';
 import AnnualizationTable from './benchmark/AnnualizationTable';
 import fetcher from '../fetcher';
+import Breadcrumb from './Breadcrumb';
 
 enum Tabs {
     Discount,
@@ -19,8 +19,16 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
 
     const { data: benchmark, isValidating } = useSWR(`/api/customers/${props.match.params.customerId}/benchmarks/${props.match.params.benchmarkId}`, fetcher);
 
+    const breadcrumbs = [
+        { path: '/customers', name: 'Customers' },
+        { path: `/customers/${props.match.params.customerId}`, name: props.match.params.customerId },
+        { path: `/customers/${props.match.params.customerId}`, name: 'Benchmarks' },
+        { path: `/customers/${props.match.params.customerId}/benchmarks/${props.match.params.benchmarkId}`, name: props.match.params.benchmarkId },
+    ];
+
     return (
         <section className="section">
+            <Breadcrumb breadcrumbs={breadcrumbs} />
             <h1 className="title">Benchmark</h1>
             <div className="tabs">
                 <ul>
