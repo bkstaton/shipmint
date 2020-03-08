@@ -1,6 +1,6 @@
 import React, { useState, ReactElement } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
@@ -19,26 +19,40 @@ enum Tabs {
 const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId: string }>) => {
     const [tab, setTab] = useState(Tabs.Summary);
 
-    const benchmarkEndpoint = `/api/customers/${props.match.params.customerId}/benchmarks/${props.match.params.benchmarkId}`;
+    const customerId = props.match.params.customerId;
+    const benchmarkId = props.match.params.benchmarkId;
 
-    const { data: benchmark, isValidating } = useSWR(benchmarkEndpoint, fetcher, { revalidateOnFocus: false });
+    const benchmarkEndpoint = `/api/customers/${customerId}/benchmarks/${benchmarkId}`;
 
-    const setTargetDiscount = (totalId: number, targetDiscount: number) => {
+    const { data: benchmark, isValidating, mutate } = useSWR(benchmarkEndpoint, fetcher, { revalidateOnFocus: false });
+
+    const saveTargetDiscount = (totalId: number, targetDiscount: number) => {
         const newBenchmark = Object.assign({}, benchmark);
 
         const total = newBenchmark.totals.find((t: any) => t.id === totalId);
         total.targetDiscount = targetDiscount;
 
-        console.log(newBenchmark);
-
-        mutate(benchmarkEndpoint, newBenchmark, false);
+        fetcher(
+            `/api/customers/${customerId}/benchmarks/${benchmarkId}/totals/${totalId}`,
+            {
+                method: 'PATCH',
+                headers: [
+                    ['Content-Type', 'application/json'],
+                ],
+                body: JSON.stringify({
+                    targetDiscount,
+                }),
+            }
+        ).then((data) => {
+            mutate(newBenchmark, false);
+        });
     };
 
     const breadcrumbs = [
         { path: '/customers', name: 'Customers' },
-        { path: `/customers/${props.match.params.customerId}`, name: props.match.params.customerId },
-        { path: `/customers/${props.match.params.customerId}`, name: 'Benchmarks' },
-        { path: `/customers/${props.match.params.customerId}/benchmarks/${props.match.params.benchmarkId}`, name: props.match.params.benchmarkId },
+        { path: `/customers/${customerId}`, name: customerId },
+        { path: `/customers/${customerId}`, name: 'Benchmarks' },
+        { path: `/customers/${customerId}/benchmarks/${benchmarkId}`, name: benchmarkId },
     ];
 
     return (
@@ -71,7 +85,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                 ? <FontAwesomeIcon icon={faSpinner} />
                 : <>
                 <div className={tab === Tabs.Summary ? '' : 'is-hidden'}><SummaryTab benchmark={benchmark} /></div>
-                    <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTable benchmark={benchmark} setTargetDiscount={setTargetDiscount} /></div>
+                    <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTable benchmark={benchmark} saveTargetDiscount={saveTargetDiscount} /></div>
                     <div className={tab === Tabs.Annualization ? '' : 'is-hidden'}><AnnualizationTable benchmark={benchmark} /></div>
                 </>
             }

@@ -2,7 +2,7 @@ import express, { Request, Response } from 'express';
 
 import parseFedex from '../services/benchmark/parser/fedex';
 import calculate from '../services/benchmark/calculate';
-import { Benchmark } from '../models';
+import { Benchmark, BenchmarkTotal } from '../models';
 
 const benchmarks = express.Router({ mergeParams: true });
 
@@ -44,6 +44,30 @@ benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {
 
         calculate(benchmark).then(result => res.send(result)).catch(e => res.status(500).send(e));
     });
+});
+
+benchmarks.patch('/:benchmarkId/totals/:totalId', (req: Request, res: Response) => {
+    const benchmarkId = req.params.benchmarkId;
+    const totalId = req.params.totalId;
+
+    const targetDiscount = req.body.targetDiscount;
+
+    BenchmarkTotal.findOne({
+        where: {
+            id: totalId,
+            benchmarkId,
+        }
+    }).then(total => {
+        if (total === null) {
+            res.send(404).send();
+            return;
+        }
+
+        total.targetDiscount = targetDiscount;
+        total.save()
+            .then(() => res.send(total))
+            .catch(e => res.status(500).send(e));
+    }).catch(e => res.status(500).send(e));
 });
 
 export default benchmarks;

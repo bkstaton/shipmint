@@ -76,6 +76,7 @@ class BenchmarkTotal extends Model {
     public bucket!: string;
     public count!: number;
     public transportationCharge!: number;
+    public targetDiscount!: number;
 
     public getDiscounts!: HasManyGetAssociationsMixin<BenchmarkDiscount>;
     public addDiscount!: HasManyAddAssociationMixin<BenchmarkDiscount, number>;
@@ -161,6 +162,10 @@ BenchmarkTotal.init({
         defaultValue: 0,
     },
     transportationCharge: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
+    targetDiscount: {
         type: DataTypes.FLOAT,
         defaultValue: 0,
     },

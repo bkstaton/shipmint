@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { formatDollar, formatPercentage } from '../../utility/format';
 
 interface Props {
     total: any;
-    setTargetDiscount: (totalId: number, targetDiscount: number) => void;
+    saveTargetDiscount: (totalId: number, targetDiscount: number) => void;
 }
 
-const DiscountRow = ({ total, setTargetDiscount }: Props) => {
+const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) => {
+    const [ targetDiscount, setTargetDiscount ] = useState(total.targetDiscount);
+
+    useEffect(() => {
+        setTargetDiscount(total.targetDiscount);
+    }, [total]);
+
     const getDiscountValue = (discounts: any[], type: string) => {
         const discount = discounts.find((d: any) => d.type === type);
 
@@ -50,8 +56,9 @@ const DiscountRow = ({ total, setTargetDiscount }: Props) => {
                     min={0}
                     max={100}
                     step={0.01}
-                    value={total.targetDiscount}
-                    onChange={e => setTargetDiscount(total.id, parseFloat(e.target.value))}
+                    value={targetDiscount}
+                    onChange={e => setTargetDiscount(parseFloat(e.target.value))}
+                    onBlur={() => saveTargetDiscount(total.id, targetDiscount)}
                 />
             </td>
         </tr>

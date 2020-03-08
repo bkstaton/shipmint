@@ -82,6 +82,7 @@ module.exports = {
             bucket: Sequelize.STRING(255),
             count: Sequelize.INTEGER.UNSIGNED,
             transportationCharge: Sequelize.FLOAT,
+            targetDiscount: Sequelize.FLOAT,
             createdAt: Sequelize.DATE,
             updatedAt: Sequelize.DATE,
           }, {
