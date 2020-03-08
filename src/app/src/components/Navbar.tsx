@@ -17,7 +17,7 @@ const Navbar = () => {
     return (
         <div className="navbar is-dark">
             <div className="navbar-brand">
-                <Link className="navbar-item" to="/">
+                <Link className="navbar-item" to="/customers">
                     <img src={logo} alt="ShipMint" />
                 </Link>
             </div>

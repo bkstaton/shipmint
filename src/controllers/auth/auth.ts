@@ -9,7 +9,7 @@ auth.use('/google', google);
 auth.get('/logout', (req: Request, res: Response) => {
     req.logout();
 
-    res.redirect('/');
+    res.redirect('/login');
 });
 
 export default auth;

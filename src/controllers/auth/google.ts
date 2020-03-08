@@ -12,7 +12,7 @@ google.get('/callback',
     { failureRedirect: '/login' }),
     function(req, res) {
       if (req.session) {
-        req.session.save(() => res.redirect('/'));
+        req.session.save(() => res.redirect('/customers'));
       }
     }
 );
