@@ -26,6 +26,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
         const discounts = await total.getDiscounts();
 
         return {
+            id: total.id,
             method: total.method,
             bucket: total.bucket,
             discounts: discounts.map(d => { return { type: d.type, amount: d.amount }; }),

@@ -3,9 +3,10 @@ import { formatDollar, formatPercentage } from '../../utility/format';
 
 interface Props {
     total: any;
+    setTargetDiscount: (totalId: number, targetDiscount: number) => void;
 }
 
-const DiscountRow = ({ total }: Props) => {
+const DiscountRow = ({ total, setTargetDiscount }: Props) => {
     const getDiscountValue = (discounts: any[], type: string) => {
         const discount = discounts.find((d: any) => d.type === type);
 
@@ -27,7 +28,7 @@ const DiscountRow = ({ total }: Props) => {
     const totalDiscount = total.discounts.reduce((total: number, discount: any) => total + discount.amount, 0);
 
     return (
-        <tr key={`${total.method} ${total.weightBucket}`}>
+        <tr key={`${total.method} ${total.bucket}`}>
             <td>{total.method}</td>
             <td>{total.bucket}</td>
             {
@@ -40,6 +41,19 @@ const DiscountRow = ({ total }: Props) => {
             }
             <td>{formatDollar(totalDiscount)}</td>
             <td>{formatPercentage(totalDiscount / total.transportationCharge)}</td>
+            <td>{formatDollar(total.transportationCharge + totalDiscount)}</td>
+            <td></td>
+            <td>
+                <input
+                    className="input"
+                    type="number"
+                    min={0}
+                    max={100}
+                    step={0.01}
+                    value={total.targetDiscount}
+                    onChange={e => setTargetDiscount(total.id, parseFloat(e.target.value))}
+                />
+            </td>
         </tr>
     );
 };
