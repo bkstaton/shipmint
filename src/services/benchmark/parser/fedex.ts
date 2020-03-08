@@ -48,6 +48,10 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         customerId
     });
 
+    // Cache of totals and discounts, keyed with a unique string
+    const totals = {} as { [key: string]: BenchmarkTotal };
+    const discounts = {} as { [key: string]: BenchmarkDiscount };
+
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
 
@@ -62,17 +66,19 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
             continue;
         }
 
-        const [ total, created ] = await BenchmarkTotal.findOrCreate({
-            where: {
+        const totalCacheKey = `${benchmark.id}-${method.toString()}-${bucket.toString()}`;
+        if (!Object.keys(totals).includes(totalCacheKey)) {
+            totals[totalCacheKey] = await BenchmarkTotal.create({
                 benchmarkId: benchmark.id,
                 method: method.toString(),
                 bucket: bucket.toString(),
-            }
-        });
+            });
+        }
+
+        const total = totals[totalCacheKey];
 
         total.count++;
         total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
-        await total.save();
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {
@@ -93,20 +99,27 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
                 continue;
             }
 
-            const [ discount, created ] = await BenchmarkDiscount.findOrCreate({
-                where: {
+            const discountCacheKey = `${total.id}-${row[i]}`;
+            if (!Object.keys(discounts).includes(discountCacheKey)) {
+                discounts[discountCacheKey] = await BenchmarkDiscount.create({
                     benchmarkTotalId: total.id,
                     type: row[i],
-                }
-            });
+                });
+            }
+
+            const discount = discounts[discountCacheKey];
 
             discount.amount += parseCsvFloat(row[i+1]);
-
-            await discount.save();
         }
     }
 
     benchmark.annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+
+    console.log(Object.keys(totals));
+
+    await Promise.all(Object.values(totals).map(t => t.save()));
+
+    await Promise.all(Object.values(discounts).map(t => t.save()));
 
     await benchmark.save();
 
