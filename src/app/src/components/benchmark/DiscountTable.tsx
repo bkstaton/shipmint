@@ -1,7 +1,7 @@
 import React from 'react';
 import DiscountRow from './DiscountRow';
 
-const DiscountTable = (props: { benchmark: any }) => {
+const DiscountTable = (props: { benchmark: any, setTargetDiscount: (totalId: number, targetDiscount: number) => void }) => {
     return (
         <table className="table is-fullwidth is-striped is-hoverable">
             <thead>
@@ -20,11 +20,16 @@ const DiscountTable = (props: { benchmark: any }) => {
                     <th>Automation Discount (%)</th>
                     <th>Total Discount ($)</th>
                     <th>Total Discount (%)</th>
+                    <th>Net Spend</th>
+                    <th>Net Discount</th>
+                    <th>Proposed Discount</th>
+                    <th>Proposed Net Spend</th>
+                    <th>Net-Net Comparison</th>
                 </tr>
             </thead>
             <tbody>
                 {props.benchmark && props.benchmark.totals && props.benchmark.totals.length && props.benchmark.totals.map((total: any) => (
-                    <DiscountRow total={total} />
+                    <DiscountRow total={total} setTargetDiscount={props.setTargetDiscount} />
                 ))}
             </tbody>
         </table>

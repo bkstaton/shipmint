@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TotalsTable = (props: { benchmarks: any[] }) => (
+const TotalsTable = (props: { benchmarks: any[], setTargetNetCharge: (id: number, val: number) => void }) => (
     <section className="section">
         <h2 className="subtitle">Totals</h2>
         <table className="table is-fullwidth is-striped is-hoverable">
@@ -11,6 +11,9 @@ const TotalsTable = (props: { benchmarks: any[] }) => (
                     <th>Total Discount $</th>
                     <th>Total Discount %</th>
                     <th>Net Spend</th>
+                    <th>Target Discount $</th>
+                    <th>Target Discount %</th>
+                    <th>Target Net Spend</th>
                 </tr>
             </thead>
             <tbody>
@@ -21,6 +24,16 @@ const TotalsTable = (props: { benchmarks: any[] }) => (
                         <td>{b.totalDiscountMoney}</td>
                         <td>{b.totalDiscountPercent}</td>
                         <td>{b.netSpend}</td>
+                        <td>
+                            <input
+                                className="input"
+                                type="number"
+                                min={0}
+                                step={0.01}
+                                value={b.targetNetCharge}
+                                onChange={e => props.setTargetNetCharge(b.id, parseFloat(e.target.value))}
+                            />
+                        </td>
                     </tr>
                 ))}
             </tbody>
