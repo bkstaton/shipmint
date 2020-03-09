@@ -14,6 +14,9 @@ export enum Method {
     HomeDelivery = 'Home Delivery',
     SmartPost = 'SmartPost',
     InternationalGround = 'International Ground',
+    TwoDay = 'FedEx 2Day',
+    StandardOvernight = 'FedEx Standard Overnight',
+    InternationalEconomy = 'FedEx Intl Economy',
 }
 
 export enum DiscountType {
