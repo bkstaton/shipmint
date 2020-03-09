@@ -39,10 +39,19 @@ const parseCsvFloat = (value: string): number => {
 };
 
 const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> => {
-    const rows: Array<string>[] = csv(data, {
-        delimiter: ';',
-        from_line: 2,
-    });
+    let rows: Array<string>[];
+    try {
+        rows = csv(data, {
+            delimiter: ';',
+            from_line: 2,
+        });
+    }
+    catch (e) {
+        rows = csv(data, {
+            delimiter: ',',
+            from_line: 2,
+        });
+    }
 
     const benchmark = await Benchmark.create({
         customerId
@@ -89,11 +98,6 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         }
 
         for (let i = Columns.FirstDiscountStart; i < row.length; i += 2) {
-            // If the name is empty, we've reached the end of this row
-            if (!row[i].length) {
-                break;
-            }
-
             // If the name is not a valid discount type, skip it
             if (!Object.values(DiscountType).includes(row[i] as DiscountType)) {
                 continue;
