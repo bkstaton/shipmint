@@ -1,7 +1,7 @@
 import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
-import { WeightBucket, Method, DiscountType } from '../types';
+import { WeightBucket, Method, DiscountType } from '../../types/fedex';
 import { Benchmark, BenchmarkDiscount, BenchmarkTotal } from '../../../models';
 
 export enum Columns {
@@ -35,7 +35,7 @@ const getBucket = (weight: number): WeightBucket | null => {
 };
 
 const parseCsvFloat = (value: string): number => {
-    return parseFloat(value.replace(/ /g, ''));
+    return parseFloat(value.replace(/ /g, '')) || 0;
 };
 
 const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> => {
@@ -66,7 +66,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
     for (let row of rows) {
         const method = row[Columns.Method];
-        if (!Object.keys(Method).includes(method)) {
+        if (!Object.values(Method).includes(method as Method)) {
             continue;
         }
 
@@ -118,8 +118,6 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     }
 
     benchmark.annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
-
-    console.log(Object.keys(totals));
 
     await Promise.all(Object.values(totals).map(t => t.save()));
 
