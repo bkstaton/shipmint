@@ -33,22 +33,26 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
 
     const totalDiscount = total.discounts.reduce((total: number, discount: any) => total + discount.amount, 0);
 
+    const proposedNetSpend = (1 - targetDiscount / 100) * total.transportationCharge;
+
     return (
         <tr key={`${total.method} ${total.bucket}`}>
             <td>{total.method}</td>
             <td>{total.bucket}</td>
             {
                 discountTypes.map(type => (
-                    <>
-                        <td key={`${type}_amount`}>{formatDollar(getDiscountValue(total.discounts, type))}</td>
-                        <td key={`${type}_percent`}>{formatPercentage(getDiscountValue(total.discounts, type) / total.transportationCharge)}</td>
-                    </>
+                    <td key={`${type}`}>
+                        {formatDollar(getDiscountValue(total.discounts, type))}<br />
+                        {formatPercentage(getDiscountValue(total.discounts, type) / total.transportationCharge)}
+                    </td>
                 ))
             }
-            <td>{formatDollar(totalDiscount)}</td>
-            <td>{formatPercentage(totalDiscount / total.transportationCharge)}</td>
+            <td>
+                {formatDollar(totalDiscount)}<br />
+                {formatPercentage(totalDiscount / total.transportationCharge)}
+            </td>
             <td>{formatDollar(total.transportationCharge + totalDiscount)}</td>
-            <td></td>
+            <td>{formatPercentage(1 - (total.transportationCharge + totalDiscount) / total.transportationCharge)}</td>
             <td>
                 <input
                     className="input"
@@ -61,6 +65,8 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
                     onBlur={() => saveTargetDiscount(total.id, targetDiscount)}
                 />
             </td>
+            <td>{formatDollar(proposedNetSpend)}</td>
+            <td>{formatDollar(proposedNetSpend - (total.transportationCharge + totalDiscount))}</td>
         </tr>
     );
 };

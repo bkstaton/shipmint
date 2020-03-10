@@ -56,7 +56,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
     ];
 
     return (
-        <section className="section">
+        <div>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <h1 className="title">Benchmark</h1>
             <div className="tabs">
@@ -89,7 +89,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                     <div className={tab === Tabs.Annualization ? '' : 'is-hidden'}><AnnualizationTable benchmark={benchmark} /></div>
                 </>
             }
-        </section>
+        </div>
     );
 };
 

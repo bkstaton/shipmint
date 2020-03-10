@@ -1,7 +1,7 @@
 import React from 'react';
 
 const TotalsTable = (props: { benchmarks: any[], setTargetNetCharge: (id: number, val: number) => void }) => (
-    <section className="section">
+    <div>
         <h2 className="subtitle">Totals</h2>
         <table className="table is-fullwidth is-striped is-hoverable">
             <thead>
@@ -38,7 +38,7 @@ const TotalsTable = (props: { benchmarks: any[], setTargetNetCharge: (id: number
                 ))}
             </tbody>
         </table>
-    </section>
+    </div>
 );
 
 export default TotalsTable;

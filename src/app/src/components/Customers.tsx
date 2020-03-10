@@ -30,7 +30,7 @@ const Customers = () => {
     };
 
     return (
-        <section className="section">
+        <div>
             <h1 className="title">Customers</h1>
 
             <h2 className="subtitle">Select Customer</h2>
@@ -51,7 +51,7 @@ const Customers = () => {
                 </div>
                 <button className="button is-primary" onClick={addCustomer}>Add Customer</button>
             </form>
-        </section>
+        </div>
     );
 };
 

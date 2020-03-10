@@ -35,7 +35,7 @@ const SummaryTab = (props: { benchmark: any }) => {
     const shipmintFee = (currentNetCharge - targetNetCharge) * 0.05;
 
     return (
-        <div className="section">
+        <div>
             <table className="table is-fullwidth is-hoverable">
                 <thead>
                     <tr>

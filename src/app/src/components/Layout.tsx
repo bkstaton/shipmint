@@ -4,7 +4,9 @@ import Navbar from './Navbar';
 const Layout = ({ children }: React.PropsWithChildren<{}>) => (
     <div>
         <Navbar />
-        {children}
+        <section className="section" style={{ overflow: 'auto' }}>
+            {children}
+        </section>
     </div>
 );
 

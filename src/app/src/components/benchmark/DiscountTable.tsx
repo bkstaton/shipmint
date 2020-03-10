@@ -8,18 +8,12 @@ const DiscountTable = (props: { benchmark: any, saveTargetDiscount: (totalId: nu
                 <tr>
                     <th>Method</th>
                     <th>Weight</th>
-                    <th>Grace Discount ($)</th>
-                    <th>Grace Discount (%)</th>
-                    <th>Discount ($)</th>
-                    <th>Discount (%)</th>
-                    <th>Earned Discount ($)</th>
-                    <th>Earned Discount (%)</th>
-                    <th>Performance Pricing ($)</th>
-                    <th>Performance Pricing (%)</th>
-                    <th>Automation Discount ($)</th>
-                    <th>Automation Discount (%)</th>
-                    <th>Total Discount ($)</th>
-                    <th>Total Discount (%)</th>
+                    <th>Grace Discount</th>
+                    <th>Discount</th>
+                    <th>Earned Discount</th>
+                    <th>Performance Pricing</th>
+                    <th>Automation Discount</th>
+                    <th>Total Discount</th>
                     <th>Net Spend</th>
                     <th>Net Discount</th>
                     <th>Proposed Discount</th>

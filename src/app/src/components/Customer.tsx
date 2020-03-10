@@ -19,7 +19,7 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
     ];
 
     return (
-        <section className="section">
+        <div>
             <Breadcrumb breadcrumbs={breadcrumbs} />
             <h1 className="title">{customer && customer.name}</h1>
             <h2 className="subtitle">Reports</h2>
@@ -44,7 +44,7 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                     ))}
                 </tbody>
             </table>
-        </section>
+        </div>
     );
 };
 

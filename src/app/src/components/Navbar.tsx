@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import useSWR, { mutate } from 'swr';
 import fetcher from '../fetcher';
 import logo from '../images/logo.png';
 
 const Navbar = () => {
+    const [ active, setActive ] = useState(false);
+
     const { data: user } = useSWR(
         '/api/user',
         fetcher,
@@ -20,8 +22,13 @@ const Navbar = () => {
                 <Link className="navbar-item" to="/customers">
                     <img src={logo} alt="ShipMint" />
                 </Link>
+                <a role="button" className={`navbar-burger burger ${active ? 'is-active' : ''}`} aria-label="menu" aria-expanded="false"  onClick={() => setActive(!active)}>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
             </div>
-            <div className="navbar-menu">
+            <div className={`navbar-menu ${active ? 'is-active' : ''}`} onClick={() => setActive(!active)}>
                 <div className="navbar-end">
                     {!user
                         ? <Link className="navbar-item" to="/login">Login</Link>
