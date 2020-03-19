@@ -4,8 +4,7 @@ import useSWR from 'swr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSpinner } from '@fortawesome/free-solid-svg-icons';
 
-import DiscountTable from './benchmark/DiscountTable';
-import AnnualizationTable from './benchmark/AnnualizationTable';
+import DiscountTab from './benchmark/DiscountTab';
 import fetcher from '../fetcher';
 import SummaryTab from './benchmark/SummaryTab';
 import Breadcrumb from './Breadcrumb';
@@ -13,7 +12,6 @@ import Breadcrumb from './Breadcrumb';
 enum Tabs {
     Summary,
     Discount,
-    Annualization,
 }
 
 const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId: string }>) => {
@@ -73,20 +71,13 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                     >
                         <a>Discounts</a>
                     </li>
-                    <li
-                        className={tab === Tabs.Annualization ? 'is-active' : ''}
-                        onClick={() => setTab(Tabs.Annualization)}
-                    >
-                        <a>Annualization</a>
-                    </li>
                 </ul>
             </div>
             {isValidating
                 ? <FontAwesomeIcon icon={faSpinner} />
                 : <>
-                <div className={tab === Tabs.Summary ? '' : 'is-hidden'}><SummaryTab benchmark={benchmark} /></div>
-                    <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTable benchmark={benchmark} saveTargetDiscount={saveTargetDiscount} /></div>
-                    <div className={tab === Tabs.Annualization ? '' : 'is-hidden'}><AnnualizationTable benchmark={benchmark} /></div>
+                    <div className={tab === Tabs.Summary ? '' : 'is-hidden'}><SummaryTab benchmark={benchmark} /></div>
+                    <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTab benchmark={benchmark} saveTargetDiscount={saveTargetDiscount} /></div>
                 </>
             }
         </div>
