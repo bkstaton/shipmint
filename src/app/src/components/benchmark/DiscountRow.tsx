@@ -37,21 +37,19 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
 
     return (
         <tr key={`${total.method} ${total.bucket}`}>
-            <td>{total.method}</td>
             <td>{total.bucket}</td>
+            <td>{total.count}</td>
             {
                 discountTypes.map(type => (
-                    <td key={`${type}`}>
-                        {formatDollar(getDiscountValue(total.discounts, type))}<br />
-                        {formatPercentage(getDiscountValue(total.discounts, type) / total.transportationCharge)}
-                    </td>
+                    <>
+                        <td key={`${type}`} className="has-text-right">{formatDollar(getDiscountValue(total.discounts, type))}</td>
+                        <td>{formatPercentage(getDiscountValue(total.discounts, type) / total.transportationCharge)}</td>
+                    </>
                 ))
             }
-            <td>
-                {formatDollar(totalDiscount)}<br />
-                {formatPercentage(totalDiscount / total.transportationCharge)}
-            </td>
-            <td>{formatDollar(total.transportationCharge + totalDiscount)}</td>
+            <td className="has-text-right">{formatDollar(totalDiscount)}</td>
+            <td>{formatPercentage(totalDiscount / total.transportationCharge)}</td>
+            <td className="has-text-right">{formatDollar(total.transportationCharge + totalDiscount)}</td>
             <td>{formatPercentage(1 - (total.transportationCharge + totalDiscount) / total.transportationCharge)}</td>
             <td>
                 <input
@@ -65,8 +63,8 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
                     onBlur={() => saveTargetDiscount(total.id, targetDiscount)}
                 />
             </td>
-            <td>{formatDollar(proposedNetSpend)}</td>
-            <td>{formatDollar(proposedNetSpend - (total.transportationCharge + totalDiscount))}</td>
+            <td className="has-text-right">{formatDollar(proposedNetSpend)}</td>
+            <td className="has-text-right">{formatDollar(proposedNetSpend - (total.transportationCharge + totalDiscount))}</td>
         </tr>
     );
 };

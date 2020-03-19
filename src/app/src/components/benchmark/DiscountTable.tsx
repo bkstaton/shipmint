@@ -1,32 +1,39 @@
 import React from 'react';
 import DiscountRow from './DiscountRow';
 
-const DiscountTable = (props: { benchmark: any, saveTargetDiscount: (totalId: number, targetDiscount: number) => void }) => {
+const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscount: (totalId: number, targetDiscount: number) => void }) => {
     return (
-        <table className="table is-fullwidth is-striped is-hoverable">
-            <thead>
-                <tr>
-                    <th>Method</th>
-                    <th>Weight</th>
-                    <th>Grace Discount</th>
-                    <th>Discount</th>
-                    <th>Earned Discount</th>
-                    <th>Performance Pricing</th>
-                    <th>Automation Discount</th>
-                    <th>Total Discount</th>
-                    <th>Net Spend</th>
-                    <th>Net Discount</th>
-                    <th>Proposed Discount</th>
-                    <th>Proposed Net Spend</th>
-                    <th>Net-Net Comparison</th>
-                </tr>
-            </thead>
-            <tbody>
-                {props.benchmark && props.benchmark.totals && props.benchmark.totals.length && props.benchmark.totals.map((total: any) => (
-                    <DiscountRow total={total} saveTargetDiscount={props.saveTargetDiscount} />
-                ))}
-            </tbody>
-        </table>
+        <div className="panel">
+            <div className="panel-heading">
+                {props.method}
+            </div>
+            <div className="panel-block">
+                <table className="table is-fullwidth is-striped is-hoverable">
+                    <thead>
+                        <tr>
+                            <th className="has-text-centered">Weight</th>
+                            <th className="has-text-centered">Count</th>
+                            <th className="has-text-centered" colSpan={2}>Grace Discount</th>
+                            <th className="has-text-centered" colSpan={2}>Discount</th>
+                            <th className="has-text-centered" colSpan={2}>Earned Discount</th>
+                            <th className="has-text-centered" colSpan={2}>Performance Pricing</th>
+                            <th className="has-text-centered" colSpan={2}>Automation Discount</th>
+                            <th className="has-text-centered" colSpan={2}>Total Discount</th>
+                            <th className="has-text-centered">Net Spend</th>
+                            <th className="has-text-centered">Net Discount</th>
+                            <th className="has-text-centered">Proposed Discount</th>
+                            <th className="has-text-centered">Proposed Net Spend</th>
+                            <th className="has-text-centered">Net-Net Comparison</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {props.totals && props.totals.length && props.totals.map((total: any) => (
+                            <DiscountRow total={total} saveTargetDiscount={props.saveTargetDiscount} />
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     );
 };
 
