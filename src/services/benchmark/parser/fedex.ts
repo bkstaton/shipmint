@@ -65,9 +65,17 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
 
     for (let row of rows) {
-        const method = row[Columns.Method];
+        let method = row[Columns.Method];
         if (!Object.values(Method).includes(method as Method)) {
-            continue;
+            method = row[Columns.Method + 1];
+
+            if (!Object.values(Method).includes(method as Method)) {
+                method = method.replace('FedEx', '').trim();
+
+                if (!Object.values(Method).includes(method as Method)) {
+                    continue;
+                }
+            }
         }
 
         const bucket = getBucket(parseFloat(row[Columns.Weight]));
