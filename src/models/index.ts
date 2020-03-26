@@ -50,6 +50,7 @@ class Benchmark extends Model {
     // Custom fields
     public customerId!: number;
     public annualizationFactor!: number;
+    public file!: string;
 
     // Relationships
     public getTotals!: HasManyGetAssociationsMixin<BenchmarkTotal>;

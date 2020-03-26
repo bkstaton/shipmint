@@ -16,6 +16,7 @@ interface CalculatedTotal {
 interface CalculatedBenchmark {
     id: number;
     annualizationFactor: number;
+    file: string;
     totals: CalculatedTotal[];
     createdAt: Date;
 }
@@ -59,6 +60,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
     return {
         id: benchmark.id,
         annualizationFactor: benchmark.annualizationFactor,
+        file: benchmark.file,
         totals: calculatedTotals,
         createdAt: benchmark.createdAt,
     };

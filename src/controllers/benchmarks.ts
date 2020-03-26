@@ -1,15 +1,15 @@
 import express, { Request, Response } from 'express';
 
-import parseFedex from '../services/benchmark/parser/fedex';
 import calculate from '../services/benchmark/calculate';
 import { Benchmark, BenchmarkTotal } from '../models';
+import { read, create, find, updateTotal, downloadFile } from '../services/benchmark';
 
 const benchmarks = express.Router({ mergeParams: true });
 
 benchmarks.get('/', (req: Request, res: Response) => {
     const customerId = req.params.customerId;
 
-    Benchmark.findAll({ where: { customerId }}).then(benchmarks => res.send(benchmarks)).catch(e => res.status(500).send(e));
+    find(customerId).then(b => res.send(b)).catch(e => res.status(500).send(e));
 });
 
 benchmarks.post('/', (req: Request, res: Response) => {
@@ -22,28 +22,14 @@ benchmarks.post('/', (req: Request, res: Response) => {
 
     const report = req.files.report;
 
-    parseFedex(customerId, report.data).then(benchmark => {
-        calculate(benchmark).then(result => res.send(result)).catch(e => res.status(500).send(e));
-    }).catch(e => res.status(500).send(e));
+    create(customerId, report.data).then(b => res.send(b)).catch(e => res.status(500).send(e));
 });
 
 benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {
     const customerId = req.params.customerId;
     const benchmarkId = req.params.benchmarkId;
 
-    Benchmark.findOne({
-        where: {
-            id: benchmarkId,
-            customerId,
-        }
-    }).then(benchmark => {
-        if (benchmark === null) {
-            res.status(404).send();
-            return;
-        }
-
-        calculate(benchmark).then(result => res.send(result)).catch(e => res.status(500).send(e));
-    });
+    read(customerId, benchmarkId).then(b => res.send(b)).catch(e => res.status(500).send(e));
 });
 
 benchmarks.patch('/:benchmarkId/totals/:totalId', (req: Request, res: Response) => {
@@ -52,21 +38,20 @@ benchmarks.patch('/:benchmarkId/totals/:totalId', (req: Request, res: Response) 
 
     const targetDiscount = req.body.targetDiscount;
 
-    BenchmarkTotal.findOne({
-        where: {
-            id: totalId,
-            benchmarkId,
-        }
-    }).then(total => {
-        if (total === null) {
-            res.send(404).send();
+    updateTotal(benchmarkId, totalId, targetDiscount).then(t => res.send(t)).catch(e => res.status(500).send(e));
+});
+
+benchmarks.get('/:benchmarkId/file', (req: Request, res: Response) => {
+    const customerId = req.params.customerId;
+    const benchmarkId = req.params.benchmarkId;
+
+    downloadFile(customerId, benchmarkId).then(f => {
+        if (f === null) {
+            res.status(404).send();
             return;
         }
 
-        total.targetDiscount = targetDiscount;
-        total.save()
-            .then(() => res.send(total))
-            .catch(e => res.status(500).send(e));
+        res.download(f.tmpName, f.name);
     }).catch(e => res.status(500).send(e));
 });
 
