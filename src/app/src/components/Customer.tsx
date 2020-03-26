@@ -36,9 +36,17 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                 </thead>
                 <tbody>
                     {benchmarks && benchmarks.length && benchmarks.map((b: any) => (
-                        <tr onClick={() => history.push(`/customers/${props.match.params.id}/benchmarks/${b.id}`)}>
+                        <tr onClick={() => history.push(`/customers/${customer.id}/benchmarks/${b.id}`)}>
                             <td>{b.createdAt}</td>
-                            <td><a href="https://aws.amazon.com/s3/" target="_blank">{b.file}</a></td>
+                            <td>
+                                <a
+                                    href={`/api/customers/${customer.id}/benchmarks/${b.id}/file`}
+                                    target="_blank"
+                                    onClick={e => e.preventDefault()}
+                                >
+                                    {b.file}
+                                </a>
+                            </td>
                             <td>&nbsp;</td>
                         </tr>
                     ))}
