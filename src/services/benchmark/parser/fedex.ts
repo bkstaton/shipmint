@@ -34,6 +34,46 @@ const getBucket = (weight: number): WeightBucket | null => {
     return null;
 };
 
+const getSmartPostBucket = (weight: number): WeightBucket | null => {
+    if (weight <= 0.07) {
+        return WeightBucket.OneOunce;
+    } else if (weight <= 0.14) {
+        return WeightBucket.SixToTenPounds;
+    } else if (weight <= 0.20) {
+        return WeightBucket.ElevenToFifteenPounds;
+    } else if (weight <= 0.26) {
+        return WeightBucket.SixteenToTwentyPounds;
+    } else if (weight <= 0.32) {
+        return WeightBucket.TwentyOneToThirtyPounds;
+    } else if (weight <= 0.39) {
+        return WeightBucket.ThirtyOneToFiftyPounds;
+    } else if (weight <= 0.45) {
+        return WeightBucket.FiftyOneToSeventyPounds;
+    } else if (weight <= 0.51) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.57) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.64) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.70) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.76) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.82) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.89) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 0.95) {
+        return WeightBucket.SeventyPlusPounds;
+    } else if (weight < 1) {
+        return WeightBucket.SeventyPlusPounds;
+    } else {
+        return WeightBucket.OnePlusPounds;
+    }
+
+    return null;
+};
+
 const parseCsvFloat = (value: string): number => {
     return parseFloat(value.replace(/ /g, '')) || 0;
 };
@@ -70,7 +110,12 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
             continue;
         }
 
-        const bucket = getBucket(parseFloat(row[Columns.Weight]));
+        let bucket: WeightBucket | null;
+        if (method === Method.SmartPost) {
+            bucket = getSmartPostBucket(parseFloat(row[Columns.Weight]));
+        } else {
+            bucket = getBucket(parseFloat(row[Columns.Weight]));
+        }
         if (!bucket) {
             continue;
         }
