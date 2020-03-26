@@ -67,8 +67,10 @@ const getSmartPostBucket = (weight: number): WeightBucket | null => {
         return WeightBucket.SeventyPlusPounds;
     } else if (weight < 1) {
         return WeightBucket.SeventyPlusPounds;
+    } else if (weight <= 10) {
+        return WeightBucket.OneToTenPounds;
     } else {
-        return WeightBucket.OnePlusPounds;
+        return WeightBucket.TenPlusPounds;
     }
 
     return null;
