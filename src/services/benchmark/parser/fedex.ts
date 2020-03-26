@@ -38,35 +38,35 @@ const getSmartPostBucket = (weight: number): WeightBucket | null => {
     if (weight <= 0.07) {
         return WeightBucket.OneOunce;
     } else if (weight <= 0.14) {
-        return WeightBucket.SixToTenPounds;
+        return WeightBucket.TwoOunces;
     } else if (weight <= 0.20) {
-        return WeightBucket.ElevenToFifteenPounds;
+        return WeightBucket.ThreeOunces;
     } else if (weight <= 0.26) {
-        return WeightBucket.SixteenToTwentyPounds;
+        return WeightBucket.FourOunces;
     } else if (weight <= 0.32) {
-        return WeightBucket.TwentyOneToThirtyPounds;
+        return WeightBucket.FiveOunces;
     } else if (weight <= 0.39) {
-        return WeightBucket.ThirtyOneToFiftyPounds;
+        return WeightBucket.SixOunces;
     } else if (weight <= 0.45) {
-        return WeightBucket.FiftyOneToSeventyPounds;
+        return WeightBucket.SevenOunces;
     } else if (weight <= 0.51) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.EightOunces;
     } else if (weight <= 0.57) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.NineOunces;
     } else if (weight <= 0.64) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.TenOunces;
     } else if (weight <= 0.70) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.ElevenOunces;
     } else if (weight <= 0.76) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.TwelveOunces;
     } else if (weight <= 0.82) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.ThirteenOunces;
     } else if (weight <= 0.89) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.FourteenOunces;
     } else if (weight <= 0.95) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.FifteenOunces;
     } else if (weight < 1) {
-        return WeightBucket.SeventyPlusPounds;
+        return WeightBucket.SixteenOunces;
     } else if (weight <= 10) {
         return WeightBucket.OneToTenPounds;
     } else {
@@ -83,16 +83,24 @@ const parseCsvFloat = (value: string): number => {
 const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> => {
     let rows: Array<string>[];
     try {
-        rows = csv(data, {
-            delimiter: ';',
-            from_line: 2,
-        });
-    }
-    catch (e) {
-        rows = csv(data, {
-            delimiter: ',',
-            from_line: 2,
-        });
+        try {
+            rows = csv(data, {
+                delimiter: ';',
+                from_line: 2,
+                relax_column_count: true,
+            });
+        }
+        catch (e) {
+            rows = csv(data, {
+                delimiter: ',',
+                from_line: 2,
+                relax_column_count: true,
+            });
+        }
+    } catch (e) {
+        console.log(e);
+
+        throw new Error('Failed parsing CSV file.');
     }
 
     const benchmark = await Benchmark.create({
@@ -121,7 +129,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         }
 
         let bucket: WeightBucket | null;
-        if (method === Method.SmartPost) {
+        if (method === Method.SmartPost.toString()) {
             bucket = getSmartPostBucket(parseFloat(row[Columns.Weight]));
         } else {
             bucket = getBucket(parseFloat(row[Columns.Weight]));

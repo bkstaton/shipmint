@@ -36,11 +36,11 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                 </thead>
                 <tbody>
                     {benchmarks && benchmarks.length && benchmarks.map((b: any) => (
-                        <tr onClick={() => history.push(`/customers/${customer.id}/benchmarks/${b.id}`)}>
+                        <tr onClick={() => history.push(`/customers/${customer && customer.id}/benchmarks/${b.id}`)}>
                             <td>{b.createdAt}</td>
                             <td>
                                 <a
-                                    href={`/api/customers/${customer.id}/benchmarks/${b.id}/file`}
+                                    href={`/api/customers/${customer && customer.id}/benchmarks/${b.id}/file`}
                                     target="_blank"
                                     onClick={e => e.preventDefault()}
                                 >

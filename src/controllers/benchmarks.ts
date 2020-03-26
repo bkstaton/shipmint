@@ -1,7 +1,5 @@
 import express, { Request, Response } from 'express';
 
-import calculate from '../services/benchmark/calculate';
-import { Benchmark, BenchmarkTotal } from '../models';
 import { read, create, find, updateTotal, downloadFile } from '../services/benchmark';
 
 const benchmarks = express.Router({ mergeParams: true });
@@ -22,7 +20,15 @@ benchmarks.post('/', (req: Request, res: Response) => {
 
     const report = req.files.report;
 
-    create(customerId, report.data).then(b => res.send(b)).catch(e => res.status(500).send(e));
+    create(customerId, report.data)
+        .then(b => res.send(b))
+        .catch(e => {
+            console.log(e);
+
+            res.status(500).send({
+                error: e.message,
+            });
+        });
 });
 
 benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {

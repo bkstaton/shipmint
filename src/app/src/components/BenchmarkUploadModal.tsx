@@ -15,7 +15,7 @@ const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
 
     const [loading, setLoading] = useState(false);
 
-    const uploadFile = () => {
+    const uploadFile = async () => {
         setLoading(true);
 
         if (!fileRef.current || !fileRef.current.files) {
@@ -25,15 +25,22 @@ const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
         let formData = new FormData();
         formData.append('report', fileRef.current.files[0]);
 
-        fetcher(
-            `/api/customers/${customerId}/benchmarks`,
-            {
-                method: 'POST',
-                body: formData,
-            }
-        ).then((data) => {
+        try {
+            const data = await fetcher(
+                `/api/customers/${customerId}/benchmarks`,
+                {
+                    method: 'POST',
+                    body: formData,
+                }
+            );
+
             history.push(`/customers/${customerId}/benchmarks/${data.id}`);
-        });
+        }
+        catch (e) {
+            window.alert('Parsing the benchmark failed. ' + e.message);
+        }
+
+        setLoading(false);
     };
 
     return (
