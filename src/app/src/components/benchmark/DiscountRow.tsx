@@ -39,6 +39,7 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
         <tr key={`${total.method} ${total.bucket}`}>
             <td>{total.bucket}</td>
             <td>{total.count}</td>
+            <td className="has-text-right">{formatDollar(total.transportationCharge)}</td>
             {
                 discountTypes.map(type => (
                     <>
