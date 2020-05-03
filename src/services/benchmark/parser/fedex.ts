@@ -2,7 +2,7 @@ import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
 import { WeightBucket, Method, DiscountType } from '../../types/fedex';
-import { Benchmark, BenchmarkDiscount, BenchmarkTotal } from '../../../models';
+import { Benchmark, BenchmarkDiscount, BenchmarkTotal, FedexShippingMethod, FedexShippingMethodBucket } from '../../../models';
 
 export enum Columns {
     Method = 11,
@@ -12,68 +12,30 @@ export enum Columns {
     ShipmentDate = 13,
 }
 
-const getBucket = (weight: number): WeightBucket | null => {
-    if (weight >= 1 && weight <= 5) {
-        return WeightBucket.OneToFivePounds;
-    } else if (weight <= 10) {
-        return WeightBucket.SixToTenPounds;
-    } else if (weight <= 15) {
-        return WeightBucket.ElevenToFifteenPounds;
-    } else if (weight <= 20) {
-        return WeightBucket.SixteenToTwentyPounds;
-    } else if (weight <= 30) {
-        return WeightBucket.TwentyOneToThirtyPounds;
-    } else if (weight <= 50) {
-        return WeightBucket.ThirtyOneToFiftyPounds;
-    } else if (weight <= 70) {
-        return WeightBucket.FiftyOneToSeventyPounds;
-    } else if (weight > 70) {
-        return WeightBucket.SeventyPlusPounds;
-    }
+const getMethod = (method: string, altMethod: string, methods: FedexShippingMethod[]): FedexShippingMethod | undefined => {
+    return methods.find((m) => {
+        if (method && method.length) {
+            return m.serviceType === method;
+        }
 
-    return null;
+        return m.groundService === altMethod;
+    });
 };
 
-const getSmartPostBucket = (weight: number): WeightBucket | null => {
-    if (weight <= 0.07) {
-        return WeightBucket.OneOunce;
-    } else if (weight <= 0.14) {
-        return WeightBucket.TwoOunces;
-    } else if (weight <= 0.20) {
-        return WeightBucket.ThreeOunces;
-    } else if (weight <= 0.26) {
-        return WeightBucket.FourOunces;
-    } else if (weight <= 0.32) {
-        return WeightBucket.FiveOunces;
-    } else if (weight <= 0.39) {
-        return WeightBucket.SixOunces;
-    } else if (weight <= 0.45) {
-        return WeightBucket.SevenOunces;
-    } else if (weight <= 0.51) {
-        return WeightBucket.EightOunces;
-    } else if (weight <= 0.57) {
-        return WeightBucket.NineOunces;
-    } else if (weight <= 0.64) {
-        return WeightBucket.TenOunces;
-    } else if (weight <= 0.70) {
-        return WeightBucket.ElevenOunces;
-    } else if (weight <= 0.76) {
-        return WeightBucket.TwelveOunces;
-    } else if (weight <= 0.82) {
-        return WeightBucket.ThirteenOunces;
-    } else if (weight <= 0.89) {
-        return WeightBucket.FourteenOunces;
-    } else if (weight <= 0.95) {
-        return WeightBucket.FifteenOunces;
-    } else if (weight < 1) {
-        return WeightBucket.SixteenOunces;
-    } else if (weight <= 10) {
-        return WeightBucket.OneToTenPounds;
-    } else {
-        return WeightBucket.TenPlusPounds;
+const getBucket = (weight: number, buckets: FedexShippingMethodBucket[]): FedexShippingMethodBucket | undefined => {
+    for (let b of buckets) {
+        if (b.minimum && b.minimum >= weight) {
+            continue;
+        }
+
+        if (b.maximum && b.maximum < weight) {
+            continue;
+        }
+
+        return b;
     }
 
-    return null;
+    return undefined;
 };
 
 const parseCsvFloat = (value: string): number => {
@@ -114,36 +76,30 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
 
+    const methods = await FedexShippingMethod.findAll();
+    const buckets = {} as {[key: string] : FedexShippingMethodBucket[]};
+
     for (let row of rows) {
-        let method = row[Columns.Method];
-        if (!Object.values(Method).includes(method as Method)) {
-            method = row[Columns.Method + 1];
-
-            if (!Object.values(Method).includes(method as Method)) {
-                method = method.replace('FedEx', '').trim();
-
-                if (!Object.values(Method).includes(method as Method)) {
-                    continue;
-                }
-            }
+        let method = getMethod(row[Columns.Method], row[Columns.Method + 1], methods);
+        if (!method) {
+            continue;
         }
 
-        let bucket: WeightBucket | null;
-        if (method === Method.SmartPost.toString()) {
-            bucket = getSmartPostBucket(parseFloat(row[Columns.Weight]));
-        } else {
-            bucket = getBucket(parseFloat(row[Columns.Weight]));
+        if (!buckets[method.id]) {
+            buckets[method.id] = await method.getBuckets();
         }
+
+        let bucket = getBucket(parseFloat(row[Columns.Weight]), buckets[method.id]);
         if (!bucket) {
             continue;
         }
 
-        const totalCacheKey = `${benchmark.id}-${method.toString()}-${bucket.toString()}`;
+        const totalCacheKey = `${benchmark.id}-${method.id}-${bucket.id}`;
         if (!Object.keys(totals).includes(totalCacheKey)) {
             totals[totalCacheKey] = await BenchmarkTotal.create({
                 benchmarkId: benchmark.id,
-                method: method.toString(),
-                bucket: bucket.toString(),
+                method: method.displayName,
+                bucket: bucket.displayName,
             });
         }
 
