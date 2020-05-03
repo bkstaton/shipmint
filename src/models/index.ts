@@ -1,5 +1,5 @@
 import {
-    Sequelize, Model, DataTypes, HasManyGetAssociationsMixin, HasManyAddAssociationMixin, HasManyHasAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, Association
+    Sequelize, Model, DataTypes, HasManyGetAssociationsMixin, HasManyAddAssociationMixin, HasManyHasAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, Association, FLOAT
 } from "sequelize";
 
 const sequelize = new Sequelize(process.env.CONNECTION_STRING || '');
@@ -98,6 +98,38 @@ class BenchmarkDiscount extends Model {
     public amount!: number;
 }
 
+class FedexShippingMethod extends Model {
+    // Sequelize-managed fields
+    public readonly id!: number;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    // Custom fields
+    public displayName!: string;
+    public serviceType!: string;
+    public groundService!: string | null;
+
+    // Relationships
+    public getBuckets!: HasManyGetAssociationsMixin<FedexShippingMethodBucket>;
+    public addBucket!: HasManyAddAssociationMixin<FedexShippingMethodBucket, number>;
+    public hasBucket!: HasManyHasAssociationMixin<FedexShippingMethodBucket, number>;
+    public countBuckets!: HasManyCountAssociationsMixin;
+    public createBucket!: HasManyCreateAssociationMixin<FedexShippingMethodBucket>;
+}
+
+class FedexShippingMethodBucket extends Model {
+    // Sequelize-managed fields
+    public readonly id!: number;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    // Custom fields
+    public fedexShippingMethodId!: number;
+    public displayName!: string;
+    public minimum!: number | null;
+    public maximum!: number | null;
+}
+
 // Initialization 
 
 User.init({
@@ -192,6 +224,35 @@ BenchmarkDiscount.init({
     sequelize,
 });
 
+FedexShippingMethod.init({
+    id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    displayName: DataTypes.STRING,
+    serviceType: DataTypes.STRING,
+    groundService: DataTypes.STRING,
+}, {
+    tableName: 'fedex_shipping_methods',
+    sequelize,
+});
+
+FedexShippingMethodBucket.init({
+    id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    fedexShippingMethodId: DataTypes.BIGINT.UNSIGNED,
+    displayName: DataTypes.STRING,
+    minimum: DataTypes.FLOAT,
+    maximum: DataTypes.FLOAT,
+}, {
+    tableName: 'fedex_shipping_method_buckets',
+    sequelize,
+});
+
 Customer.hasMany(Benchmark, {
     sourceKey: 'id',
     foreignKey: 'customerId',
@@ -216,12 +277,22 @@ BenchmarkTotal.hasMany(BenchmarkDiscount, {
 
 BenchmarkDiscount.belongsTo(BenchmarkTotal, { targetKey: 'id' });
 
+FedexShippingMethod.hasMany(FedexShippingMethodBucket, {
+    sourceKey: 'id',
+    foreignKey: 'fedexShippingMethodId',
+    as: 'buckets'
+});
+
+FedexShippingMethodBucket.belongsTo(FedexShippingMethod, { targetKey: 'id' });
+
 export {
     User,
     Customer,
     Benchmark,
     BenchmarkTotal,
     BenchmarkDiscount,
+    FedexShippingMethod,
+    FedexShippingMethodBucket,
 }
 
 export default sequelize;

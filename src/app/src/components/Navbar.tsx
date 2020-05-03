@@ -29,6 +29,9 @@ const Navbar = () => {
                 </a>
             </div>
             <div className={`navbar-menu ${active ? 'is-active' : ''}`} onClick={() => setActive(!active)}>
+                <div className="navbar-start">
+                    <Link className="navbar-item" to="/methods/fedex">FedEx Methods</Link>
+                </div>
                 <div className="navbar-end">
                     {!user
                         ? <Link className="navbar-item" to="/login">Login</Link>

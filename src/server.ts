@@ -11,6 +11,7 @@ import { requireAuth } from './authentication/middleware';
 import auth from './controllers/auth/auth';
 import customers from './controllers/customers';
 import user from './controllers/user';
+import fedexShippingMethods from './controllers/fedexShippingMethods';
 
 // Workaround for Docker not sending Ctrl-C to process correctly
 process.on('SIGINT', () => process.exit());
@@ -36,6 +37,7 @@ const api = express.Router();
 
 api.use('/user', requireAuth, user);
 api.use('/customers', requireAuth, customers);
+api.use('/fedex-shipping-methods', requireAuth, fedexShippingMethods);
 
 app.use('/api', api);
 

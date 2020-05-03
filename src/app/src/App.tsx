@@ -6,6 +6,7 @@ import Login from './components/Login';
 import Benchmark from './components/Benchmark';
 import Customers from './components/Customers';
 import Customer from './components/Customer';
+import FedexMethodManager from './components/fedex/MethodManager';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route exact path="/customers" component={Customers} />
         <Route exact path="/customers/:id" component={Customer} />
         <Route exact path="/customers/:customerId/benchmarks/:benchmarkId" component={Benchmark} />
+        <Route exact path="/methods/fedex" component={FedexMethodManager} />
       </Layout>
     </Router>
   );
