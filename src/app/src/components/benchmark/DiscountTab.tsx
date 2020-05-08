@@ -12,7 +12,26 @@ const DiscountTab = (props: Props) => {
 
     const tables = Object.keys(groups).map(method => (
         <DiscountTable method={method} totals={groups[method]} saveTargetDiscount={props.saveTargetDiscount} />
-    ));
+    )).sort((a, b) => {
+        const aOrder = a.props.totals[0].order;
+        const bOrder = b.props.totals[0].order;
+
+        if (aOrder === null) {
+            if (bOrder !== null) {
+                return 1;
+            }
+            return 0;
+        }
+
+        if (bOrder === null) {
+            if (aOrder !== null) {
+                return -1;
+            }
+            return 0;
+        }
+
+        return aOrder - bOrder;
+    });
 
     return (
         <div>

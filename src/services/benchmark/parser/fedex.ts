@@ -12,8 +12,8 @@ export enum Columns {
     ShipmentDate = 13,
 }
 
-const getMethod = (method: string, altMethod: string, methods: FedexShippingMethod[]): FedexShippingMethod | undefined => {
-    return methods.find((m) => {
+const getMethods = (method: string, altMethod: string, methods: FedexShippingMethod[]): FedexShippingMethod[] => {
+    return methods.filter((m) => {
         if (method && method.length) {
             return m.serviceType === method;
         }
@@ -22,9 +22,9 @@ const getMethod = (method: string, altMethod: string, methods: FedexShippingMeth
     });
 };
 
-const getBucket = (weight: number, buckets: FedexShippingMethodBucket[]): FedexShippingMethodBucket | undefined => {
+const getBucket = (weight: number, buckets: FedexShippingMethodBucket[]): FedexShippingMethodBucket | null => {
     for (let b of buckets) {
-        if (b.minimum && b.minimum >= weight) {
+        if (b.minimum && b.minimum > weight) {
             continue;
         }
 
@@ -35,7 +35,7 @@ const getBucket = (weight: number, buckets: FedexShippingMethodBucket[]): FedexS
         return b;
     }
 
-    return undefined;
+    return null;
 };
 
 const parseCsvFloat = (value: string): number => {
@@ -80,17 +80,29 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     const buckets = {} as {[key: string] : FedexShippingMethodBucket[]};
 
     for (let row of rows) {
-        let method = getMethod(row[Columns.Method], row[Columns.Method + 1], methods);
-        if (!method) {
+        let matchingMethods = getMethods(row[Columns.Method], row[Columns.Method + 1], methods);
+        if (!matchingMethods || !matchingMethods.length) {
             continue;
         }
 
-        if (!buckets[method.id]) {
-            buckets[method.id] = await method.getBuckets();
-        }
+        let method: FedexShippingMethod | null = null;
+        let bucket: FedexShippingMethodBucket | null = null;
 
-        let bucket = getBucket(parseFloat(row[Columns.Weight]), buckets[method.id]);
-        if (!bucket) {
+        for (const m of matchingMethods) {
+            if (!buckets[m.id]) {
+                buckets[m.id] = await m.getBuckets();
+            }
+
+            bucket = getBucket(parseFloat(row[Columns.Weight]), buckets[m.id]);
+            if (!bucket) {
+                continue;
+            }
+
+            method = m;
+            break;
+        }
+        
+        if (!method || !bucket) {
             continue;
         }
 
@@ -107,6 +119,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
         total.count++;
         total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        total.order = method.order;
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
         if (shipmentDate < minDate) {

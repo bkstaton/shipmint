@@ -1,5 +1,5 @@
 import express, { Request, Response } from 'express';
-import { read, find, create, del, update } from '../services/fedex_shipping_methods';
+import { read, find, create, del, update, moveUp, moveDown } from '../services/fedex_shipping_methods';
 
 const fedexShippingMethods = express.Router();
 
@@ -21,6 +21,18 @@ fedexShippingMethods.patch('/:fedexShippingMethodId', (req: Request, res: Respon
     const fedexShippingMethodId = parseInt(req.params.fedexShippingMethodId, 10);
 
     update(fedexShippingMethodId, req.body).then(m => res.send(m)).catch(e => res.status(500).send(e));
+});
+
+fedexShippingMethods.patch('/:fedexShippingMethodId/up', (req: Request, res: Response) => {
+    const fedexShippingMethodId = parseInt(req.params.fedexShippingMethodId, 10);
+
+    moveUp(fedexShippingMethodId).then(m => res.send(m)).catch(e => res.status(500).send(e));
+});
+
+fedexShippingMethods.patch('/:fedexShippingMethodId/down', (req: Request, res: Response) => {
+    const fedexShippingMethodId = parseInt(req.params.fedexShippingMethodId, 10);
+
+    moveDown(fedexShippingMethodId).then(m => res.send(m)).catch(e => res.status(500).send(e));
 });
 
 fedexShippingMethods.delete('/:fedexShippingMethodId', (req: Request, res: Response) => {

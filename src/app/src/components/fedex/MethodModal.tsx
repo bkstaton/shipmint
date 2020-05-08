@@ -13,6 +13,7 @@ interface Method {
     displayName: string;
     serviceType: string;
     groundService: string;
+    order: number | null;
     buckets: Bucket[];
 }
 
@@ -28,6 +29,7 @@ const MethodModal = (props: Props) => {
         displayName: '',
         serviceType: '',
         groundService: '',
+        order: null,
         buckets: [] as Bucket[],
     });
 
@@ -40,6 +42,7 @@ const MethodModal = (props: Props) => {
             displayName: '',
             serviceType: '',
             groundService: '',
+            order: null,
             buckets: [],
         });
     }, [props.method, props.isActive]);
@@ -61,6 +64,16 @@ const MethodModal = (props: Props) => {
             displayName: '',
             minimum: null,
             maximum: null,
+        });
+    };
+
+    const updateBucket = (bucketName: string, bucket: Bucket) => {
+        setMethod({
+            ...method,
+            buckets: [
+                ...method.buckets.filter(b => b.displayName !== bucketName),
+                bucket,
+            ],
         });
     };
 
@@ -124,8 +137,7 @@ const MethodModal = (props: Props) => {
                                 />
                             </div>
                         </div>
-
-                        <table className="table is-fullwidth">
+                        <table className="table">
                             <thead>
                                 <tr>
                                     <td>Name</td>
@@ -135,11 +147,54 @@ const MethodModal = (props: Props) => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {method && method.buckets && method.buckets.map((b: Bucket) =>
+                                {method && method.buckets && method.buckets.sort((a: Bucket, b: Bucket) => {
+                                    if (a.minimum === null) {
+                                        return -1;
+                                    }
+                                    if (b.minimum === null) {
+                                        return 1;
+                                    }
+                                    return a.minimum - b.minimum;
+                                }).map((b: Bucket) => (
                                     <tr>
-                                        <td>{b.displayName}</td>
-                                        <td>{b.minimum}</td>
-                                        <td>{b.maximum}</td>
+                                        <td>
+                                            <input
+                                                className="input"
+                                                type="text"
+                                                value={b.displayName}
+                                                onChange={e => updateBucket(b.displayName, {
+                                                    displayName: e.target.value,
+                                                    minimum: b.minimum,
+                                                    maximum: b.maximum,
+                                                })}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                className="input"
+                                                type="number"
+                                                step={0.01}
+                                                value={b.minimum ? b.minimum : ''}
+                                                onChange={e => updateBucket(b.displayName, {
+                                                    displayName: b.displayName,
+                                                    minimum: parseFloat(e.target.value),
+                                                    maximum: b.maximum,
+                                                })}
+                                            />
+                                        </td>
+                                        <td>
+                                            <input
+                                                className="input"
+                                                type="number"
+                                                step={0.01}
+                                                value={b.maximum ? b.maximum : ''}
+                                                onChange={e => updateBucket(b.displayName, {
+                                                    displayName: b.displayName,
+                                                    minimum: b.minimum,
+                                                    maximum: parseFloat(e.target.value),
+                                                })}
+                                            />
+                                        </td>
                                         <td>
                                             <button
                                                 type="button"
@@ -150,7 +205,7 @@ const MethodModal = (props: Props) => {
                                             </button>
                                         </td>
                                     </tr>
-                                )}
+                                ))}
                             </tbody>
                         </table>
 

@@ -17,24 +17,18 @@ interface Method {
     displayName: string;
     serviceType: string;
     groundService: string;
+    order: number | null;
     buckets: Bucket[];
 }
 
 const MethodManager = () => {
     const [modalActive, setModalActive] = useState(false);
 
-    const { data: methods, isValidating, mutate } = useSWR<Method[]>('/api/fedex-shipping-methods', fetcher);
+    const { data: methods, isValidating, mutate, revalidate } = useSWR<Method[]>('/api/fedex-shipping-methods', fetcher);
     
     const addMethod = (method: Method) => {
         if (!methods) {
             return;
-        }
-
-        for (let m of methods) {
-            if (m.displayName === method.displayName || m.serviceType === method.serviceType) {
-                window.alert('Cannot add duplicate method.');
-                return;
-            }
         }
 
         fetcher(
@@ -70,7 +64,7 @@ const MethodManager = () => {
             }
         ).then(() => {
             mutate([
-                ...(methods.filter((m: any) => m.displayName !== method.displayName)),
+                ...(methods.filter((m: any) => m.id !== method.id)),
                 method
             ], false);
         });
@@ -82,9 +76,27 @@ const MethodManager = () => {
         }
 
         fetcher(`/api/fedex-shipping-methods/${method.id}`, { method: 'DELETE' }).then(() => {
-            mutate([
-                ...(methods.filter((m: any) => m.id !== method.id)),
-            ], false);
+            mutate(methods.filter((m: any) => m.id !== method.id), false);
+        });
+    };
+
+    const moveMethodUp = (method: Method) => {
+        if (!methods) {
+            return;
+        }
+
+        fetcher(`/api/fedex-shipping-methods/${method.id}/up`, { method: 'PATCH' }).then(() => {
+            revalidate();
+        });
+    };
+
+    const moveMethodDown = (method: Method) => {
+        if (!methods) {
+            return;
+        }
+
+        fetcher(`/api/fedex-shipping-methods/${method.id}/down`, { method: 'PATCH' }).then(() => {
+            revalidate();
         });
     };
 
@@ -100,9 +112,11 @@ const MethodManager = () => {
             <table className="table">
                 <thead>
                     <tr>
+                        <td></td>
                         <td>Display Name</td>
                         <td>Service Type</td>
                         <td>Ground Service</td>
+                        <td></td>
                         <td></td>
                         <td>
                             <button type="button" className="button is-link" onClick={() => setModalActive(true)}>
@@ -113,7 +127,32 @@ const MethodManager = () => {
                 </thead>
                 <tbody>
                     {!isValidating
-                        ? methods && methods.map(m => <MethodRow method={m} editMethod={updateMethod} removeMethod={removeMethod} />)
+                        ? methods && methods.sort((a, b) => {
+                            if (a.order === null) {
+                                if (b.order !== null) {
+                                    return 1;
+                                }
+                                return 0;
+                            }
+
+                            if (b.order === null) {
+                                if (a.order !== null) {
+                                    return -1;
+                                }
+                                return 0;
+                            }
+
+                            return a.order - b.order;
+                        }).map(m => (
+                            <MethodRow
+                                method={m}
+                                editMethod={updateMethod}
+                                copyMethod={addMethod}
+                                removeMethod={removeMethod}
+                                moveUp={moveMethodUp}
+                                moveDown={moveMethodDown}
+                            />
+                        ))
                         : <FontAwesomeIcon icon={faSpinner} spin />}
                 </tbody>
             </table>

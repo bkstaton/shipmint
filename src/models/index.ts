@@ -73,6 +73,7 @@ class BenchmarkTotal extends Model {
 
     // Custom fields
     public benchmarkId!: number;
+    public order!: number;
     public method!: string;
     public bucket!: string;
     public count!: number;
@@ -108,6 +109,7 @@ class FedexShippingMethod extends Model {
     public displayName!: string;
     public serviceType!: string;
     public groundService!: string | null;
+    public order!: number;
 
     // Relationships
     public getBuckets!: HasManyGetAssociationsMixin<FedexShippingMethodBucket>;
@@ -188,6 +190,7 @@ BenchmarkTotal.init({
         primaryKey: true,
     },
     benchmarkId: DataTypes.BIGINT.UNSIGNED,
+    order: DataTypes.BIGINT.UNSIGNED,
     method: DataTypes.STRING,
     bucket: DataTypes.STRING,
     count: {
@@ -233,6 +236,7 @@ FedexShippingMethod.init({
     displayName: DataTypes.STRING,
     serviceType: DataTypes.STRING,
     groundService: DataTypes.STRING,
+    order: DataTypes.BIGINT.UNSIGNED,
 }, {
     tableName: 'fedex_shipping_methods',
     sequelize,

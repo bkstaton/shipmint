@@ -1,4 +1,5 @@
 import sequelize, { FedexShippingMethod, FedexShippingMethodBucket } from "../models";
+import { Op } from "sequelize/types";
 
 export interface Bucket {
     displayName: string;
@@ -21,6 +22,7 @@ export const create = async (request: UpsertRequest) => {
             displayName: request.displayName,
             serviceType: request.serviceType,
             groundService: request.groundService,
+            order: await FedexShippingMethod.count() + 1,
         });
 
         // Add Buckets to database
@@ -109,6 +111,106 @@ export const update = async (fedexShippingMethodId: number, request: UpsertReque
     return await mapMethodToResponse(method);
 };
 
+export const moveUp = async (fedexShippingMethodId: number) => {
+    const method = await FedexShippingMethod.findOne({
+        where: {
+            id: fedexShippingMethodId,
+        }
+    });
+
+    if (method === null) {
+        return null;
+    }
+
+    const totalCount = await FedexShippingMethod.count();
+
+    if (method.order === 1) {
+        return await mapMethodToResponse(method);
+    }
+
+    if (method.order === null) {
+        method.order = 1;
+    } else {
+        method.order = method.order - 1;
+    }
+
+    const t = await sequelize.transaction();
+
+    try {
+        const nextMethod = await FedexShippingMethod.findOne({
+            where: {
+                order: method.order,
+            }
+        });
+
+        if (nextMethod && nextMethod.order) {
+            nextMethod.order = nextMethod.order + 1;
+
+            await nextMethod.save();
+        }
+
+        await method.save();
+
+        await t.commit();
+    } catch (e) {
+        await t.rollback();
+
+        throw e;
+    }
+
+    return await mapMethodToResponse(method);
+};
+
+export const moveDown = async (fedexShippingMethodId: number) => {
+    const method = await FedexShippingMethod.findOne({
+        where: {
+            id: fedexShippingMethodId,
+        }
+    });
+
+    if (method === null) {
+        return null;
+    }
+
+    const totalCount = await FedexShippingMethod.count();
+
+    if (method.order === totalCount) {
+        return await mapMethodToResponse(method);
+    }
+
+    if (method.order === null) {
+        method.order = totalCount;
+    } else {
+        method.order = method.order + 1;
+    }
+
+    const t = await sequelize.transaction();
+
+    try {
+        const nextMethod = await FedexShippingMethod.findOne({
+            where: {
+                order: method.order,
+            }
+        });
+
+        if (nextMethod && nextMethod.order) {
+            nextMethod.order = nextMethod.order - 1;
+
+            await nextMethod.save();
+        }
+
+        await method.save();
+
+        await t.commit();
+    } catch (e) {
+        await t.rollback();
+
+        throw e;
+    }
+
+    return await mapMethodToResponse(method);
+};
+
 export const del = async (fedexShippingMethodId: number) => {
     await FedexShippingMethodBucket.destroy({
         where: {
@@ -131,6 +233,7 @@ const mapMethodToResponse = async (method: FedexShippingMethod) => {
         displayName: method.displayName,
         serviceType: method.serviceType,
         groundService: method.groundService,
+        order: method.order,
         buckets: buckets.map(b => {
                 return {
                 id: b.id,
