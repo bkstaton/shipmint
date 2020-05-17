@@ -8,10 +8,12 @@ import DiscountTab from './benchmark/DiscountTab';
 import fetcher from '../fetcher';
 import SummaryTab from './benchmark/SummaryTab';
 import Breadcrumb from './Breadcrumb';
+import SurchargeTab from './benchmark/SurchargeTab';
 
 enum Tabs {
     Summary,
     Discount,
+    Surcharges,
 }
 
 const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId: string }>) => {
@@ -71,6 +73,12 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                     >
                         <a>Discounts</a>
                     </li>
+                    <li
+                        className={tab === Tabs.Surcharges ? 'is-active' : ''}
+                        onClick={() => setTab(Tabs.Surcharges)}
+                    >
+                        <a>Surcharges</a>
+                    </li>
                 </ul>
             </div>
             {isValidating
@@ -78,6 +86,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                 : <>
                     <div className={tab === Tabs.Summary ? '' : 'is-hidden'}><SummaryTab benchmark={benchmark} /></div>
                     <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTab benchmark={benchmark} saveTargetDiscount={saveTargetDiscount} /></div>
+                    <div className={tab === Tabs.Surcharges ? '' : 'is-hidden'}><SurchargeTab benchmark={benchmark} /></div>
                 </>
             }
         </div>

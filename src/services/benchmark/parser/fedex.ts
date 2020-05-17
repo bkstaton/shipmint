@@ -1,8 +1,8 @@
 import csv from 'csv-parse/lib/sync';
 import moment from 'moment';
 
-import { WeightBucket, Method, DiscountType } from '../../types/fedex';
-import { Benchmark, BenchmarkDiscount, BenchmarkTotal, FedexShippingMethod, FedexShippingMethodBucket } from '../../../models';
+import { DiscountType, surchargesGroupedByMethod } from '../../types/fedex';
+import { Benchmark, BenchmarkDiscount, BenchmarkTotal, FedexShippingMethod, FedexShippingMethodBucket, BenchmarkSurcharge } from '../../../models';
 
 export enum Columns {
     Method = 11,
@@ -72,6 +72,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     // Cache of totals and discounts, keyed with a unique string
     const totals = {} as { [key: string]: BenchmarkTotal };
     const discounts = {} as { [key: string]: BenchmarkDiscount };
+    const surcharges = {} as { [key: string]: BenchmarkSurcharge };
 
     let minDate = new Date(8640000000000000); // All dates in the file are guaranteed to be less than this large date
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
@@ -130,22 +131,46 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         }
 
         for (let i = Columns.FirstDiscountStart; i < row.length; i += 2) {
-            // If the name is not a valid discount type, skip it
-            if (!Object.values(DiscountType).includes(row[i] as DiscountType)) {
-                continue;
+            // If the name is a valid discount type, aggregate it that way
+            if (Object.values(DiscountType).includes(row[i] as DiscountType)) {
+                const discountCacheKey = `${total.id}-${row[i]}`;
+
+                if (!Object.keys(discounts).includes(discountCacheKey)) {
+                    discounts[discountCacheKey] = await BenchmarkDiscount.create({
+                        benchmarkTotalId: total.id,
+                        type: row[i],
+                    });
+                }
+
+                const discount = discounts[discountCacheKey];
+
+                discount.amount += parseCsvFloat(row[i+1]);
             }
+            else if (row[i] && row[i].length) { // Otherwise, as long as the label isn't empty it must be a surcharge
+                let surchargeCacheKey: string;
+                let surchargeType: string;
 
-            const discountCacheKey = `${total.id}-${row[i]}`;
-            if (!Object.keys(discounts).includes(discountCacheKey)) {
-                discounts[discountCacheKey] = await BenchmarkDiscount.create({
-                    benchmarkTotalId: total.id,
-                    type: row[i],
-                });
+                if (surchargesGroupedByMethod.includes(row[i])) {
+                    surchargeCacheKey = `${benchmark.id}-${method.id}-${row[i]}`;
+                    surchargeType = `${row[i]} - ${method.displayName}`;
+                }
+                else {
+                    surchargeCacheKey = `${benchmark.id}-${row[i]}`;
+                    surchargeType = row[i];
+                }
+
+                if (!Object.keys(surcharges).includes(surchargeCacheKey)) {
+                    surcharges[surchargeCacheKey] = await BenchmarkSurcharge.create({
+                        benchmarkId: benchmark.id,
+                        type: surchargeType,
+                    });
+                }
+
+                const surcharge = surcharges[surchargeCacheKey];
+
+                surcharge.count += 1;
+                surcharge.totalCharge += parseCsvFloat(row[i+1]);
             }
-
-            const discount = discounts[discountCacheKey];
-
-            discount.amount += parseCsvFloat(row[i+1]);
         }
     }
 
@@ -153,7 +178,9 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
     await Promise.all(Object.values(totals).map(t => t.save()));
 
-    await Promise.all(Object.values(discounts).map(t => t.save()));
+    await Promise.all(Object.values(discounts).map(d => d.save()));
+
+    await Promise.all(Object.values(surcharges).map(s => s.save()));
 
     await benchmark.save();
 

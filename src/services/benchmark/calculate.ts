@@ -1,5 +1,4 @@
 import { Benchmark } from "../../models";
-import { Method, WeightBucket } from "../types/fedex";
 
 interface CalculatedDiscount {
     type: string;
@@ -14,11 +13,19 @@ interface CalculatedTotal {
     transportationCharge: number;
 }
 
+interface CalculatedSurcharge {
+    type: string;
+    count: number;
+    charge: number;
+    publishedCharge: number;
+}
+
 interface CalculatedBenchmark {
     id: number;
     annualizationFactor: number;
     file: string;
     totals: CalculatedTotal[];
+    surcharges: CalculatedSurcharge[];
     createdAt: Date;
 }
 
@@ -39,31 +46,25 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
             transportationCharge: total.transportationCharge,
             targetDiscount: total.targetDiscount,
         };
-    }))).sort((a, b) => {
-        if (Object.values(Method).indexOf(a.method as Method) > Object.values(Method).indexOf(b.method as Method)) {
-            return 1;
-        }
-        
-        if (Object.values(Method).indexOf(a.method as Method) < Object.values(Method).indexOf(b.method as Method)) {
-            return -1;
-        }
+    })));
 
-        if (Object.values(WeightBucket).indexOf(a.bucket as WeightBucket) > Object.values(WeightBucket).indexOf(b.bucket as WeightBucket)) {
-            return 1;
-        }
+    const surcharges = await benchmark.getSurcharges();
 
-        if (Object.values(WeightBucket).indexOf(a.bucket as WeightBucket) < Object.values(WeightBucket).indexOf(b.bucket as WeightBucket)) {
-            return -1;
+    const calculatedSurcharges = (await Promise.all(Object.values(surcharges).map(surcharge => {
+        return {
+            type: surcharge.type,
+            count: surcharge.count,
+            charge: surcharge.totalCharge / surcharge.count,
+            publishedCharge: surcharge.publishedCharge || surcharge.totalCharge / surcharge.count,
         }
-
-        return 0;
-    });
+    })));
 
     return {
         id: benchmark.id,
         annualizationFactor: benchmark.annualizationFactor,
         file: benchmark.file,
         totals: calculatedTotals,
+        surcharges: calculatedSurcharges,
         createdAt: benchmark.createdAt,
     };
 };

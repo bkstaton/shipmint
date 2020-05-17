@@ -59,9 +59,16 @@ class Benchmark extends Model {
     public countTotals!: HasManyCountAssociationsMixin;
     public createTotal!: HasManyCreateAssociationMixin<BenchmarkTotal>;
 
+    public getSurcharges!: HasManyGetAssociationsMixin<BenchmarkSurcharge>;
+    public addSurcharges!: HasManyAddAssociationMixin<BenchmarkSurcharge, number>;
+    public hasSurcharges!: HasManyHasAssociationMixin<BenchmarkSurcharge, number>;
+    public countSurcharges!: HasManyCountAssociationsMixin;
+    public createSurcharges!: HasManyCreateAssociationMixin<BenchmarkSurcharge>;
+
     public static associations: {
         totals: Association<Benchmark, BenchmarkTotal>;
         discounts: Association<Benchmark, BenchmarkDiscount>;
+        surcharges: Association<Benchmark, BenchmarkSurcharge>;
     };
 }
 
@@ -97,6 +104,19 @@ class BenchmarkDiscount extends Model {
     public benchmarkTotalId!: number;
     public type!: string;
     public amount!: number;
+}
+
+class BenchmarkSurcharge extends Model {
+    // Sequelize-managed fields
+    public readonly id!: number;
+    public readonly createdAt!: Date;
+    public readonly updatedAt!: Date;
+
+    // Custom fields
+    public type!: string;
+    public count!: number;
+    public totalCharge!: number;
+    public publishedCharge!: number;
 }
 
 class FedexShippingMethod extends Model {
@@ -227,6 +247,28 @@ BenchmarkDiscount.init({
     sequelize,
 });
 
+BenchmarkSurcharge.init({
+    id: {
+        type: DataTypes.BIGINT.UNSIGNED,
+        autoIncrement: true,
+        primaryKey: true,
+    },
+    benchmarkId: DataTypes.BIGINT.UNSIGNED,
+    type: DataTypes.STRING,
+    count: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
+    totalCharge: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
+    publishedCharge: DataTypes.FLOAT,
+}, {
+    tableName: 'benchmark_surcharges',
+    sequelize,
+});
+
 FedexShippingMethod.init({
     id: {
         type: DataTypes.BIGINT.UNSIGNED,
@@ -273,6 +315,14 @@ Benchmark.hasMany(BenchmarkTotal, {
 
 BenchmarkTotal.belongsTo(Benchmark, { targetKey: 'id' });
 
+Benchmark.hasMany(BenchmarkSurcharge, {
+    sourceKey: 'id',
+    foreignKey: 'benchmarkId',
+    as: 'surcharges'
+});
+
+BenchmarkSurcharge.belongsTo(Benchmark, { targetKey: 'id' });
+
 BenchmarkTotal.hasMany(BenchmarkDiscount, {
     sourceKey: 'id',
     foreignKey: 'benchmarkTotalId',
@@ -295,6 +345,7 @@ export {
     Benchmark,
     BenchmarkTotal,
     BenchmarkDiscount,
+    BenchmarkSurcharge,
     FedexShippingMethod,
     FedexShippingMethodBucket,
 }

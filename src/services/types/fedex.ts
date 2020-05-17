@@ -1,42 +1,3 @@
-export enum WeightBucket {
-    OneOunce = '1 oz',
-    TwoOunces = '2 oz',
-    ThreeOunces = '3 oz',
-    FourOunces = '4 oz',
-    FiveOunces = '5 oz',
-    SixOunces = '6 oz',
-    SevenOunces = '7 oz',
-    EightOunces = '8 oz',
-    NineOunces = '9 oz',
-    TenOunces = '10 oz',
-    ElevenOunces = '11 oz',
-    TwelveOunces = '12 oz',
-    ThirteenOunces = '13 oz',
-    FourteenOunces = '14 oz',
-    FifteenOunces = '15 oz',
-    SixteenOunces = '16 oz',
-    OneToTenPounds = '1-10 lbs',
-    TenPlusPounds = '10+ lbs',
-    OneToFivePounds = '1-5 lbs',
-    SixToTenPounds = '6-10 lbs',
-    ElevenToFifteenPounds = '11-15 lbs',
-    SixteenToTwentyPounds = '16-20 lbs',
-    TwentyOneToThirtyPounds = '21-30 lbs',
-    ThirtyOneToFiftyPounds = '31-50 lbs',
-    FiftyOneToSeventyPounds = '51-70 lbs',
-    SeventyPlusPounds = '70+ lbs',
-}
-
-export enum Method {
-    Ground = 'Ground',
-    HomeDelivery = 'Home Delivery',
-    SmartPost = 'SmartPost',
-    InternationalGround = 'International Ground',
-    TwoDay = 'FedEx 2Day',
-    StandardOvernight = 'FedEx Standard Overnight',
-    InternationalEconomy = 'FedEx Intl Economy',
-}
-
 export enum DiscountType {
     GraceDiscount = 'Grace Discount',
     Discount = 'Discount',
@@ -44,3 +5,14 @@ export enum DiscountType {
     PerformancePricing = 'Performance Pricing',
     AutomationDiscount = 'Automation Discount',
 }
+
+export const surchargesGroupedByMethod = [
+    'DAS',
+    'DAS Resi',
+    'DAS Comm',
+    'DAS Extended',
+    'DAS Extended Resi',
+    'DAS Extended Comm',
+    'Residential',
+    'Residential Delivery',
+];
