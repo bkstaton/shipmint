@@ -14,6 +14,7 @@ interface CalculatedTotal {
 }
 
 interface CalculatedSurcharge {
+    id: number;
     type: string;
     count: number;
     charge: number;
@@ -52,6 +53,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
 
     const calculatedSurcharges = (await Promise.all(Object.values(surcharges).map(surcharge => {
         return {
+            id: surcharge.id,
             type: surcharge.type,
             count: surcharge.count,
             charge: surcharge.totalCharge / surcharge.count,

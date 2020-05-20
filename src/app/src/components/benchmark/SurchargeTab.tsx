@@ -3,6 +3,7 @@ import SurchargeTable from './SurchargeTable';
 
 interface Props {
     benchmark: any;
+    savePublishedCharge: (surchargeId: number, publishedCharge: number | null) => void;
 }
 
 const SurchargeTab = (props: Props) => {
@@ -11,7 +12,7 @@ const SurchargeTab = (props: Props) => {
     }
 
     return (
-        <SurchargeTable surcharges={props.benchmark.surcharges} />
+        <SurchargeTable surcharges={props.benchmark.surcharges} savePublishedCharge={props.savePublishedCharge} />
     );
 };
 

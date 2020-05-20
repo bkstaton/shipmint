@@ -48,6 +48,28 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
         });
     };
 
+    const savePublishedCharge = (surchargeId: number, publishedCharge: number | null) => {
+        const newBenchmark = Object.assign({}, benchmark);
+
+        const surcharge = newBenchmark.surcharges.find((s: any) => s.id === surchargeId);
+        surcharge.publishedCharge = publishedCharge;
+
+        fetcher(
+            `/api/customers/${customerId}/benchmarks/${benchmarkId}/surcharges/${surchargeId}`,
+            {
+                method: 'PATCH',
+                headers: [
+                    ['Content-Type', 'application/json'],
+                ],
+                body: JSON.stringify({
+                    publishedCharge,
+                }),
+            }
+        ).then((data) => {
+            mutate(newBenchmark, false);
+        });
+    };
+
     const breadcrumbs = [
         { path: '/customers', name: 'Customers' },
         { path: `/customers/${customerId}`, name: customerId },
@@ -86,7 +108,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                 : <>
                     <div className={tab === Tabs.Summary ? '' : 'is-hidden'}><SummaryTab benchmark={benchmark} /></div>
                     <div className={tab === Tabs.Discount ? '' : 'is-hidden'}><DiscountTab benchmark={benchmark} saveTargetDiscount={saveTargetDiscount} /></div>
-                    <div className={tab === Tabs.Surcharges ? '' : 'is-hidden'}><SurchargeTab benchmark={benchmark} /></div>
+                    <div className={tab === Tabs.Surcharges ? '' : 'is-hidden'}><SurchargeTab benchmark={benchmark} savePublishedCharge={savePublishedCharge} /></div>
                 </>
             }
         </div>

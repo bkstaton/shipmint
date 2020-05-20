@@ -1,4 +1,4 @@
-import { Benchmark, BenchmarkTotal } from "../../models";
+import { Benchmark, BenchmarkTotal, BenchmarkSurcharge } from "../../models";
 import parseFedex from '../benchmark/parser/fedex';
 import calculate from '../benchmark/calculate';
 import { upload, download } from './files';
@@ -49,6 +49,24 @@ export const updateTotal = async (benchmarkId: string, totalId: string, targetDi
     await total.save();
 
     return total;
+};
+
+export const updateSurcharge = async (benchmarkId: string, surchargeId: string, publishedCharge: number) => {
+    const surcharge = await BenchmarkSurcharge.findOne({
+        where: {
+            id: surchargeId,
+            benchmarkId,
+        }
+    });
+
+    if (surcharge === null) {
+        return null;
+    }
+
+    surcharge.publishedCharge = publishedCharge;
+    await surcharge.save();
+
+    return surcharge;
 };
 
 export const downloadFile = async (customerId: string, benchmarkId: string): Promise<{tmpName: string, name: string} | null> => {

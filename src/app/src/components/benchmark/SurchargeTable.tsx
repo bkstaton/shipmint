@@ -1,9 +1,9 @@
 import React from 'react';
-import SurchargeTab from './SurchargeTab';
 import SurchargeRow from './SurchargeRow';
 
 interface Props {
     surcharges?: any[];
+    savePublishedCharge: (surchargeId: number, publishedCharge: number | null) => void;
 }
 
 const SurchargeTable = (props: Props) => (
@@ -22,7 +22,7 @@ const SurchargeTable = (props: Props) => (
             </thead>
             <tbody>
                 {props.surcharges && props.surcharges.length && props.surcharges.sort((a: any, b: any) => a.type < b.type ? -1 : 1).map((surcharge: any) => (
-                    <SurchargeRow surcharge={surcharge} />
+                    <SurchargeRow key={surcharge.id} surcharge={surcharge} savePublishedCharge={props.savePublishedCharge} />
                 ))}
             </tbody>
         </table>
