@@ -5,6 +5,6 @@ module.exports = {
         "url": process.env.CONNECTION_STRING,
     },
     "production": {
-        "url": process.env.CONNECTION_STRING,
+        "url": process.env.PROD_CONNECTION_STRING,
     }
 };
