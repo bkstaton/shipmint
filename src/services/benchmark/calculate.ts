@@ -42,6 +42,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
             method: total.method,
             bucket: total.bucket,
             order: total.order,
+            bucketOrder: total.bucketOrder,
             count: total.count,
             discounts,
             transportationCharge: total.transportationCharge,

@@ -38,6 +38,21 @@ const getBucket = (weight: number, buckets: FedexShippingMethodBucket[]): FedexS
     return null;
 };
 
+const getBucketOrder = (bucket: FedexShippingMethodBucket, buckets: FedexShippingMethodBucket[]): number => {
+    const matchingBuckets = buckets
+        .sort((a: FedexShippingMethodBucket, b: FedexShippingMethodBucket) => {
+            if (a.minimum === null) {
+                return -1;
+            }
+            if (b.minimum === null) {
+                return 1;
+            }
+            return a.minimum - b.minimum;
+        });
+
+    return matchingBuckets.findIndex(b => b.id === bucket.id);
+};
+
 const parseCsvFloat = (value: string): number => {
     return parseFloat(value.replace(/ /g, '')) || 0;
 };
@@ -78,7 +93,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
     let maxDate = new Date(-8640000000000000); // All dates in the file are guaranteed to be greater than this small date
 
     const methods = await FedexShippingMethod.findAll();
-    const buckets = {} as {[key: string] : FedexShippingMethodBucket[]};
+    const buckets = {} as { [key: string]: FedexShippingMethodBucket[] };
 
     for (let row of rows) {
         let matchingMethods = getMethods(row[Columns.Method], row[Columns.Method + 1], methods);
@@ -102,7 +117,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
             method = m;
             break;
         }
-        
+
         if (!method || !bucket) {
             continue;
         }
@@ -112,7 +127,9 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
             totals[totalCacheKey] = await BenchmarkTotal.create({
                 benchmarkId: benchmark.id,
                 method: method.displayName,
+                order: method.order,
                 bucket: bucket.displayName,
+                bucketOrder: getBucketOrder(bucket, buckets[method.id]),
             });
         }
 
@@ -144,7 +161,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
                 const discount = discounts[discountCacheKey];
 
-                discount.amount += parseCsvFloat(row[i+1]);
+                discount.amount += parseCsvFloat(row[i + 1]);
             }
             else if (row[i] && row[i].length) { // Otherwise, as long as the label isn't empty it must be a surcharge
                 let surchargeCacheKey: string;
@@ -169,7 +186,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
                 const surcharge = surcharges[surchargeCacheKey];
 
                 surcharge.count += 1;
-                surcharge.totalCharge += parseCsvFloat(row[i+1]);
+                surcharge.totalCharge += parseCsvFloat(row[i + 1]);
             }
         }
     }

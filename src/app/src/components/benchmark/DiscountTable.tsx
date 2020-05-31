@@ -76,7 +76,7 @@ const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscoun
                             </tr>
                         </thead>
                         <tbody>
-                            {props.totals && props.totals.length && props.totals.map((total: any) => (
+                            {props.totals && props.totals.length && props.totals.sort((a: any, b: any) => a.bucketOrder - b.bucketOrder).map((total: any) => (
                                 <DiscountRow total={total} saveTargetDiscount={props.saveTargetDiscount} />
                             ))}
                         </tbody>

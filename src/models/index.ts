@@ -81,6 +81,7 @@ class BenchmarkTotal extends Model {
     // Custom fields
     public benchmarkId!: number;
     public order!: number;
+    public bucketOrder!: number;
     public method!: string;
     public bucket!: string;
     public count!: number;
@@ -211,6 +212,7 @@ BenchmarkTotal.init({
     },
     benchmarkId: DataTypes.BIGINT.UNSIGNED,
     order: DataTypes.BIGINT.UNSIGNED,
+    bucketOrder: DataTypes.BIGINT.UNSIGNED,
     method: DataTypes.STRING,
     bucket: DataTypes.STRING,
     count: {
