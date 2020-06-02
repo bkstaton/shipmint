@@ -4,6 +4,7 @@ export enum DiscountType {
     EarnedDiscount = 'Earned Discount',
     PerformancePricing = 'Performance Pricing',
     AutomationDiscount = 'Automation Discount',
+    AutomationBonusDiscount = 'Automation Bonus Discount',
 }
 
 export const surchargesGroupedByMethod = [

@@ -29,6 +29,7 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
         'Earned Discount',
         'Performance Pricing',
         'Automation Discount',
+        'Automation Bonus Discount',
     ];
 
     const totalDiscount = total.discounts.reduce((total: number, discount: any) => total + discount.amount, 0);

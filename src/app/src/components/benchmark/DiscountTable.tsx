@@ -11,6 +11,7 @@ const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscoun
         earnedDiscount: 0,
         performancePricing: 0,
         automationDiscount: 0,
+        automationBonusDiscount: 0,
         totalDiscount: 0,
         targetDiscount: 0,
     };
@@ -39,6 +40,7 @@ const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscoun
                 agg.earnedDiscount += getDiscountValue(total.discounts, 'Earned Discount');
                 agg.performancePricing += getDiscountValue(total.discounts, 'Performance Pricing');
                 agg.automationDiscount += getDiscountValue(total.discounts, 'Automation Discount');
+                agg.automationBonusDiscount += getDiscountValue(total.discounts, 'Automation Bonus Discount');
                 agg.targetDiscount += -1 * (total.targetDiscount || 0) / 100 * total.transportationCharge;
 
                 return agg;
@@ -67,6 +69,7 @@ const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscoun
                                 <th className="has-text-centered" colSpan={2}>Earned Discount</th>
                                 <th className="has-text-centered" colSpan={2}>Performance Pricing</th>
                                 <th className="has-text-centered" colSpan={2}>Automation Discount</th>
+                                <th className="has-text-centered" colSpan={2}>Automation Bonus Discount</th>
                                 <th className="has-text-centered" colSpan={2}>Total Discount</th>
                                 <th className="has-text-centered">Net Spend</th>
                                 <th className="has-text-centered">Net Discount</th>
@@ -95,6 +98,8 @@ const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscoun
                                 <th>{formatPercentage(totals.performancePricing / totals.transportationCharge)}</th>
                                 <th className="has-text-right">{formatDollar(totals.automationDiscount)}</th>
                                 <th>{formatPercentage(totals.automationDiscount / totals.transportationCharge)}</th>
+                                <th className="has-text-right">{formatDollar(totals.automationBonusDiscount)}</th>
+                                <th>{formatPercentage(totals.automationBonusDiscount / totals.transportationCharge)}</th>
                                 <th className="has-text-right">{formatDollar(totals.totalDiscount)}</th>
                                 <th>{formatPercentage(totals.totalDiscount / totals.transportationCharge)}</th>
                                 <th className="has-text-right">{formatDollar(totals.transportationCharge + totals.totalDiscount)}</th>

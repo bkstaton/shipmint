@@ -29,6 +29,7 @@ export const create = async (request: UpsertRequest) => {
         await Promise.all(
             request.buckets.map(b => FedexShippingMethodBucket.create({
                 ...b,
+                id: undefined,
                 fedexShippingMethodId: method.id,
             }))
         );
