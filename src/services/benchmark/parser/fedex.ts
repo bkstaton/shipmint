@@ -53,7 +53,11 @@ const getBucketOrder = (bucket: FedexShippingMethodBucket, buckets: FedexShippin
     return matchingBuckets.findIndex(b => b.id === bucket.id);
 };
 
-const parseCsvFloat = (value: string): number => {
+const parseCsvFloat = (value?: string): number => {
+    if (!value || !value.length) {
+        return 0;
+    }
+
     return parseFloat(value.replace(/ /g, '')) || 0;
 };
 
