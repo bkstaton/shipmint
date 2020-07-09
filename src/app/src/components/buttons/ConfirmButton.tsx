@@ -6,10 +6,14 @@ interface Props {
 }
 
 const ConfirmButton = (props: PropsWithChildren<Props>) => {
-    const onClick = () => {
+    const onClick = (e: React.MouseEvent) => {
         if (window.confirm(props.prompt)) {
             props.onClick();
         }
+
+        e.stopPropagation();
+        e.preventDefault();
+        return false;
     }
 
     return (

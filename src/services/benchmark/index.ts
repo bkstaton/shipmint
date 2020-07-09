@@ -1,7 +1,7 @@
-import { Benchmark, BenchmarkTotal, BenchmarkSurcharge } from "../../models";
+import sequelize, { Benchmark, BenchmarkTotal, BenchmarkSurcharge, BenchmarkDiscount } from "../../models";
 import parseFedex from '../benchmark/parser/fedex';
 import calculate from '../benchmark/calculate';
-import { upload, download } from './files';
+import { upload, download, remove } from './files';
 
 export const create = async (customerId: string, report: Buffer) => {
     const benchmark = await parseFedex(customerId, report);
@@ -31,6 +31,52 @@ export const read = async (customerId: string, benchmarkId: string) => {
     }
 
     return await calculate(benchmark);
+};
+
+export const del = async (customerId: string, benchmarkId: string): Promise<void> => {
+    const benchmark = await Benchmark.findOne({
+        where: {
+            id: benchmarkId,
+            customerId,
+        }
+    });
+
+    if (benchmark === null) {
+        return;
+    }
+
+    await remove(benchmark.id.toString() + '.csv');
+
+    await sequelize.transaction(async t => {
+        await BenchmarkSurcharge.destroy({
+            where: {
+                benchmarkId,
+            }
+        });
+
+        const totals = await BenchmarkTotal.findAll({
+            where: {
+                benchmarkId,
+            }
+        });
+
+        for (const total of totals) {
+            await BenchmarkDiscount.destroy({
+                where: {
+                    benchmarkTotalId: total.id,
+                }
+            });
+
+            await total.destroy();
+        }
+
+        await Benchmark.destroy({
+            where: {
+                id: benchmarkId,
+                customerId,
+            }
+        });
+    });
 };
 
 export const updateTotal = async (benchmarkId: string, totalId: string, targetDiscount: number) => {

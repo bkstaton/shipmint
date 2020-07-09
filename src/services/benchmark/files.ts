@@ -44,3 +44,16 @@ export const download = async (name: string): Promise<string | null> => {
         return null;
     }
 };
+
+export const remove = async (name: string): Promise<void> => {
+    if (!process.env.AWS_ACCESS_KEY_ID) {
+        return;
+    }
+
+    const s3 = new S3({ apiVersion: '2006-03-01' });
+
+    await s3.deleteObject({
+        Key: name,
+        Bucket: process.env.AWS_BUCKET || '',
+    }).promise();
+};

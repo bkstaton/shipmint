@@ -4,10 +4,13 @@ import useSWR from 'swr';
 import fetcher from '../fetcher';
 import BenchmarkUploadModal from './BenchmarkUploadModal';
 import Breadcrumb from './Breadcrumb';
+import ConfirmButton from './buttons/ConfirmButton';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
 
 const Customer = (props: RouteComponentProps<{id: string}>) => {
     const { data: customer } = useSWR<any>(`/api/customers/${props.match.params.id}`, fetcher);
-    const { data: benchmarks } = useSWR(`/api/customers/${props.match.params.id}/benchmarks`, fetcher);
+    const { data: benchmarks, mutate: mutateBenchmarks } = useSWR(`/api/customers/${props.match.params.id}/benchmarks`, fetcher);
 
     const [ uploadModalActive, setUploadModalActive ] = useState(false);
 
@@ -17,6 +20,17 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
         { path: '/customers', name: 'Customers' },
         { path: `/customers/${props.match.params.id}`, name: props.match.params.id },
     ];
+
+    const deleteBenchmark = (benchmarkId: number) => {
+        const newBenchmarks = benchmarks.filter((b: any) => b.id !== benchmarkId);
+
+        fetcher(
+            `/api/customers/${customer.id}/benchmarks/${benchmarkId}`,
+            {
+                method: 'DELETE',
+            }
+        ).then(() => mutateBenchmarks(newBenchmarks));
+    };
 
     return (
         <div>
@@ -47,7 +61,14 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                                     {b.file}
                                 </a>
                             </td>
-                            <td>&nbsp;</td>
+                            <td>
+                                <ConfirmButton
+                                    prompt="Are you sure you want to delete this benchmark?"
+                                    onClick={() => deleteBenchmark(b.id)}
+                                >
+                                    <FontAwesomeIcon icon={faTrash} />
+                                </ConfirmButton>
+                            </td>
                         </tr>
                     ))}
                 </tbody>

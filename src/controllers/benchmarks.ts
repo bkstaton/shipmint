@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 
-import { read, create, find, updateTotal, downloadFile, updateSurcharge } from '../services/benchmark';
+import { read, create, find, updateTotal, downloadFile, updateSurcharge, del } from '../services/benchmark';
 
 const benchmarks = express.Router({ mergeParams: true });
 
@@ -36,6 +36,13 @@ benchmarks.get('/:benchmarkId', (req: Request, res: Response) => {
     const benchmarkId = req.params.benchmarkId;
 
     read(customerId, benchmarkId).then(b => res.send(b)).catch(e => res.status(500).send(e));
+});
+
+benchmarks.delete('/:benchmarkId', (req: Request, res: Response) => {
+    const customerId = req.params.customerId;
+    const benchmarkId = req.params.benchmarkId;
+
+    del(customerId, benchmarkId).then(b => res.send(b)).catch(e => res.status(500).send(e));
 });
 
 benchmarks.patch('/:benchmarkId/totals/:totalId', (req: Request, res: Response) => {
