@@ -51,7 +51,7 @@ const Customer = (props: RouteComponentProps<{id: string}>) => {
                 <tbody>
                     {benchmarks && benchmarks.length && benchmarks.map((b: any) => (
                         <tr onClick={() => history.push(`/customers/${customer && customer.id}/benchmarks/${b.id}`)}>
-                            <td>{b.createdAt}</td>
+                            <td>{new Date(b.createdAt).toLocaleString()}</td>
                             <td>
                                 <a
                                     href={`/api/customers/${customer && customer.id}/benchmarks/${b.id}/file`}
