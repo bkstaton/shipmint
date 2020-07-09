@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-
 import { read, create, find, updateTotal, downloadFile, updateSurcharge, del } from '../services/benchmark';
 
 const benchmarks = express.Router({ mergeParams: true });
@@ -20,7 +19,7 @@ benchmarks.post('/', (req: Request, res: Response) => {
 
     const report = req.files.report;
 
-    create(customerId, report.data)
+    create(customerId, report.name, report.data)
         .then(b => res.send(b))
         .catch(e => {
             console.log(e);

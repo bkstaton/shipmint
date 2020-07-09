@@ -3,12 +3,12 @@ import parseFedex from '../benchmark/parser/fedex';
 import calculate from '../benchmark/calculate';
 import { upload, download, remove } from './files';
 
-export const create = async (customerId: string, report: Buffer) => {
+export const create = async (customerId: string, displayName: string, report: Buffer) => {
     const benchmark = await parseFedex(customerId, report);
 
     await upload(benchmark.id.toString() + '.csv', report);
 
-    benchmark.file = benchmark.id.toString() + '.csv';
+    benchmark.file = displayName;
     await benchmark.save();
 
     return await calculate(benchmark);
