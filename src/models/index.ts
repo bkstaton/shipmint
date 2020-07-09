@@ -118,6 +118,7 @@ class BenchmarkSurcharge extends Model {
     public count!: number;
     public totalCharge!: number;
     public publishedCharge!: number;
+    public targetDiscount!: number;
 }
 
 class FedexShippingMethod extends Model {
@@ -266,6 +267,10 @@ BenchmarkSurcharge.init({
         defaultValue: 0,
     },
     publishedCharge: DataTypes.FLOAT,
+    targetDiscount: {
+        type: DataTypes.FLOAT,
+        defaultValue: 0,
+    },
 }, {
     tableName: 'benchmark_surcharges',
     sequelize,

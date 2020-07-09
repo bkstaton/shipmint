@@ -48,11 +48,12 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
         });
     };
 
-    const savePublishedCharge = (surchargeId: number, publishedCharge: number | null) => {
+    const savePublishedCharge = (surchargeId: number, publishedCharge: number | null, targetDiscount: number | null) => {
         const newBenchmark = Object.assign({}, benchmark);
 
         const surcharge = newBenchmark.surcharges.find((s: any) => s.id === surchargeId);
         surcharge.publishedCharge = publishedCharge;
+        surcharge.targetDiscount = targetDiscount;
 
         fetcher(
             `/api/customers/${customerId}/benchmarks/${benchmarkId}/surcharges/${surchargeId}`,
@@ -63,6 +64,7 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
                 ],
                 body: JSON.stringify({
                     publishedCharge,
+                    targetDiscount,
                 }),
             }
         ).then((data) => {

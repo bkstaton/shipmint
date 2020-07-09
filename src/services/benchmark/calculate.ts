@@ -19,6 +19,7 @@ interface CalculatedSurcharge {
     count: number;
     charge: number;
     publishedCharge: number;
+    targetDiscount: number;
 }
 
 interface CalculatedBenchmark {
@@ -59,6 +60,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
             count: surcharge.count,
             charge: surcharge.totalCharge / surcharge.count,
             publishedCharge: surcharge.publishedCharge || surcharge.totalCharge / surcharge.count,
+            targetDiscount: surcharge.targetDiscount,
         }
     })));
 

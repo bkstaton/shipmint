@@ -51,7 +51,7 @@ export const updateTotal = async (benchmarkId: string, totalId: string, targetDi
     return total;
 };
 
-export const updateSurcharge = async (benchmarkId: string, surchargeId: string, publishedCharge: number) => {
+export const updateSurcharge = async (benchmarkId: string, surchargeId: string, publishedCharge?: number, targetDiscount?: number) => {
     const surcharge = await BenchmarkSurcharge.findOne({
         where: {
             id: surchargeId,
@@ -63,7 +63,13 @@ export const updateSurcharge = async (benchmarkId: string, surchargeId: string, 
         return null;
     }
 
-    surcharge.publishedCharge = publishedCharge;
+    if (publishedCharge !== undefined) {
+        surcharge.publishedCharge = publishedCharge;
+    }
+    if (targetDiscount !== undefined) {
+        surcharge.targetDiscount = targetDiscount;
+    }
+
     await surcharge.save();
 
     return surcharge;

@@ -3,7 +3,7 @@ import SurchargeRow from './SurchargeRow';
 
 interface Props {
     surcharges?: any[];
-    savePublishedCharge: (surchargeId: number, publishedCharge: number | null) => void;
+    savePublishedCharge: (surchargeId: number, publishedCharge: number | null, targetDiscount: number | null) => void;
 }
 
 const SurchargeTable = (props: Props) => (
@@ -18,6 +18,9 @@ const SurchargeTable = (props: Props) => (
                     <th>Total Net Charge</th>
                     <th>Discount ($)</th>
                     <th>Discount (%)</th>
+                    <th>Proposed Discount (%)</th>
+                    <th>Proposed Net Spend</th>
+                    <th>Net-Net Comparison</th>
                 </tr>
             </thead>
             <tbody>

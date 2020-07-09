@@ -52,8 +52,9 @@ benchmarks.patch('/:benchmarkId/surcharges/:totalId', (req: Request, res: Respon
     const surchargeId = req.params.totalId;
 
     const publishedCharge = req.body.publishedCharge;
+    const targetDiscount = req.body.targetDiscount;
 
-    updateSurcharge(benchmarkId, surchargeId, publishedCharge).then(t => res.send(t)).catch(e => res.status(500).send(e));
+    updateSurcharge(benchmarkId, surchargeId, publishedCharge, targetDiscount).then(t => res.send(t)).catch(e => res.status(500).send(e));
 });
 
 benchmarks.get('/:benchmarkId/file', (req: Request, res: Response) => {
