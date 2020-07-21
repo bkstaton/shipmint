@@ -11,7 +11,7 @@ passport.use(new google.Strategy({
     clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
     callbackURL: `${process.env.GOOGLE_AUTH_CALLBACK}/auth/google/callback`,
   },
-  (accessToken, refreshToken, profile, done) => {
+  (_accessToken, _refreshToken, profile, done) => {
     if (!profile.emails) {
       return done('Only goshipmint.com or codercouple.com emails are allowed');
     }

@@ -1,5 +1,13 @@
 import {
-    Sequelize, Model, DataTypes, HasManyGetAssociationsMixin, HasManyAddAssociationMixin, HasManyHasAssociationMixin, HasManyCountAssociationsMixin, HasManyCreateAssociationMixin, Association, FLOAT
+    Sequelize,
+    Model,
+    DataTypes,
+    HasManyGetAssociationsMixin,
+    HasManyAddAssociationMixin,
+    HasManyHasAssociationMixin,
+    HasManyCountAssociationsMixin,
+    HasManyCreateAssociationMixin,
+    Association,
 } from "sequelize";
 
 const sequelize = new Sequelize(process.env.CONNECTION_STRING || '');

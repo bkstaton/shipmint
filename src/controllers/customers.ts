@@ -4,7 +4,7 @@ import { Customer } from '../models';
 
 const customers = express.Router();
 
-customers.get('/', (req: Request, res: Response) => {
+customers.get('/', (_req: Request, res: Response) => {
     Customer.findAll().then(c =>res.send(c) );
 });
 

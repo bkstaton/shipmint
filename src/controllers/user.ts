@@ -1,5 +1,4 @@
 import express, { Request, Response } from 'express';
-import { resolveSoa } from 'dns';
 
 const user = express.Router();
 

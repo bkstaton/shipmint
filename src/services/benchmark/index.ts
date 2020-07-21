@@ -51,7 +51,8 @@ export const del = async (customerId: string, benchmarkId: string): Promise<void
         await BenchmarkSurcharge.destroy({
             where: {
                 benchmarkId,
-            }
+            },
+            transaction: t,
         });
 
         const totals = await BenchmarkTotal.findAll({
@@ -64,17 +65,21 @@ export const del = async (customerId: string, benchmarkId: string): Promise<void
             await BenchmarkDiscount.destroy({
                 where: {
                     benchmarkTotalId: total.id,
-                }
+                },
+                transaction: t,
             });
 
-            await total.destroy();
+            await total.destroy({
+                transaction: t,
+            });
         }
 
         await Benchmark.destroy({
             where: {
                 id: benchmarkId,
                 customerId,
-            }
+            },
+            transaction: t,
         });
     });
 };

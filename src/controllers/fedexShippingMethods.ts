@@ -3,7 +3,7 @@ import { read, find, create, del, update, moveUp, moveDown } from '../services/f
 
 const fedexShippingMethods = express.Router();
 
-fedexShippingMethods.get('/', (req: Request, res: Response) => {
+fedexShippingMethods.get('/', (_req: Request, res: Response) => {
     find().then(m => res.send(m));
 });
 

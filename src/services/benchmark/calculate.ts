@@ -22,7 +22,7 @@ interface CalculatedSurcharge {
     targetDiscount: number;
 }
 
-interface CalculatedBenchmark {
+export interface CalculatedBenchmark {
     id: number;
     annualizationFactor: number;
     file: string;

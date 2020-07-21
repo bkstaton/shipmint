@@ -1,5 +1,4 @@
 import sequelize, { FedexShippingMethod, FedexShippingMethodBucket } from "../models";
-import { Op } from "sequelize/types";
 
 export interface Bucket {
     displayName: string;
@@ -122,8 +121,6 @@ export const moveUp = async (fedexShippingMethodId: number) => {
     if (method === null) {
         return null;
     }
-
-    const totalCount = await FedexShippingMethod.count();
 
     if (method.order === 1) {
         return await mapMethodToResponse(method);
