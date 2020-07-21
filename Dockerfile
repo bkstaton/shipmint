@@ -1,42 +1,42 @@
-FROM node:lts-alpine as backend
+FROM node:lts-alpine as api
 
 WORKDIR /srv
 
-COPY package.json /srv/
-COPY package-lock.json /srv/
+COPY api/package.json /srv/
+COPY api/package-lock.json /srv/
 RUN npm install
 
-COPY .sequelizerc /srv/
-COPY sequelize-cli /srv/sequelize-cli/
+COPY api/.sequelizerc /srv/
+COPY api/sequelize-cli /srv/sequelize-cli/
 
-COPY tsconfig.json /srv/
+COPY api/tsconfig.json /srv/
 
-COPY src /srv/src
+COPY api/src /srv/src
 
 RUN npm run build
 
-FROM node:lts-alpine as frontend
+FROM node:lts-alpine as ui
 
-COPY src/app/package.json /srv/
-COPY src/app/package-lock.json /srv/
+COPY ui/package.json /srv/
+COPY ui/package-lock.json /srv/
 
 WORKDIR /srv/
 
 RUN npm install
 
-COPY src/app /srv/
+COPY ui /srv/
 
 RUN npm run build
 
 FROM node:lts-alpine as app
 
-COPY --from=backend /srv/.sequelizerc /srv/
-COPY --from=backend /srv/sequelize-cli /srv/sequelize-cli/
-COPY --from=backend /srv/package.json /srv/
-COPY --from=backend /srv/node_modules /srv/node_modules/
-COPY --from=backend /srv/dist /srv/
+COPY --from=api /srv/.sequelizerc /srv/
+COPY --from=api /srv/sequelize-cli /srv/sequelize-cli/
+COPY --from=api /srv/package.json /srv/
+COPY --from=api /srv/node_modules /srv/node_modules/
+COPY --from=api /srv/dist /srv/
 
-COPY --from=frontend /srv/build /srv/app/build
+COPY --from=ui /srv/build /srv/app/build
 
 WORKDIR /srv
 

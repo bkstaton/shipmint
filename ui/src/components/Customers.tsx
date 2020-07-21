@@ -1,18 +1,31 @@
-import React, { useState, MouseEvent } from 'react';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
+import { Form } from 'informed';
 import useSWR from 'swr';
 import fetcher from '../fetcher';
-import { useHistory } from 'react-router-dom';
+import TextField from './form/TextField';
+import SubmitButton from './form/SubmitButton';
+
+const validateName = (value: string) => {
+    console.log(value);
+
+    if (!value || !value.length) {
+        return 'Field is required';
+    }
+
+    if (value.length < 1) {
+        return `Field must have at least 1 character`;
+    }
+
+    return undefined;
+};
 
 const Customers = () => {
-    const [ newCustomerName, setNewCustomerName ] = useState('');
-
     const { data: customers, isValidating } = useSWR<any[]>('/api/customers', fetcher);
 
     const history = useHistory();
 
-    const addCustomer = (e: MouseEvent<HTMLButtonElement>) => {
-        e.preventDefault();
-
+    const addCustomer = (values: any) => {
         fetcher(
             `/api/customers`,
             {
@@ -21,7 +34,7 @@ const Customers = () => {
                     ['Content-Type', 'application/json'],
                 ],
                 body: JSON.stringify({
-                    name: newCustomerName,
+                    name: values.name,
                 }),
             }
         ).then((data) => {
@@ -42,15 +55,10 @@ const Customers = () => {
             </div>
 
             <h2>Create Customer</h2>
-            <form>
-                <div className="field">
-                    <label className="label">Name</label>
-                    <div className="control">
-                        <input className="input" type="text" value={newCustomerName} onChange={e => setNewCustomerName(e.target.value)} />
-                    </div>
-                </div>
-                <button className="button is-primary" onClick={addCustomer}>Add Customer</button>
-            </form>
+            <Form onSubmit={addCustomer}>
+                <TextField label="Name" field="name" validate={validateName} />
+                <SubmitButton>Add Customer</SubmitButton>
+            </Form>
         </div>
     );
 };
