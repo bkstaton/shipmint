@@ -6,11 +6,16 @@ interface CalculatedDiscount {
 }
 
 interface CalculatedTotal {
+    id: number;
     method: string;
     bucket: string;
+    class: string;
     order: number;
+    bucketOrder: number;
+    count: number;
     discounts: CalculatedDiscount[];
     transportationCharge: number;
+    targetDiscount: number;
 }
 
 interface CalculatedSurcharge {
@@ -42,6 +47,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
             id: total.id,
             method: total.method,
             bucket: total.bucket,
+            class: total.class,
             order: total.order,
             bucketOrder: total.bucketOrder,
             count: total.count,

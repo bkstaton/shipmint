@@ -7,8 +7,6 @@ import TextField from './form/TextField';
 import SubmitButton from './form/SubmitButton';
 
 const validateName = (value: string) => {
-    console.log(value);
-
     if (!value || !value.length) {
         return 'Field is required';
     }

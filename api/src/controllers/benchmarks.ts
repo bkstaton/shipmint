@@ -1,5 +1,6 @@
 import express, { Request, Response } from 'express';
 import { read, create, find, updateTotal, downloadFile, updateSurcharge, del } from '../services/benchmark';
+import exportPdf from '../services/benchmark/export/pdf';
 
 const benchmarks = express.Router({ mergeParams: true });
 
@@ -75,6 +76,25 @@ benchmarks.get('/:benchmarkId/file', (req: Request, res: Response) => {
 
         res.download(f.tmpName, f.name);
     }).catch(e => res.status(500).send(e));
+});
+
+benchmarks.get('/:benchmarkId/export', (req: Request, res: Response) => {
+    const customerId = req.params.customerId;
+    const benchmarkId = req.params.benchmarkId;
+
+    exportPdf(customerId, benchmarkId).then(pdf => {
+        if (pdf === null) {
+            res.status(404).send();
+            return;
+        }
+
+        pdf.pipe(res);
+        pdf.end();
+    }).catch(e => {
+        console.log(e);
+
+        res.status(500).send(e);
+    });
 });
 
 export default benchmarks;

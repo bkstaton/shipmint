@@ -10,6 +10,7 @@ export interface UpsertRequest {
     displayName: string;
     serviceType: string;
     groundService: string | null;
+    class: string;
     buckets: Bucket[];
 }
 
@@ -21,6 +22,7 @@ export const create = async (request: UpsertRequest) => {
             displayName: request.displayName,
             serviceType: request.serviceType,
             groundService: request.groundService,
+            class: request.class,
             order: await FedexShippingMethod.count() + 1,
         });
 
@@ -83,6 +85,7 @@ export const update = async (fedexShippingMethodId: number, request: UpsertReque
         method.displayName = request.displayName;
         method.serviceType = request.serviceType;
         method.groundService = request.groundService;
+        method.class = request.class;
 
         await method.save();
 
@@ -231,9 +234,10 @@ const mapMethodToResponse = async (method: FedexShippingMethod) => {
         displayName: method.displayName,
         serviceType: method.serviceType,
         groundService: method.groundService,
+        class: method.class,
         order: method.order,
         buckets: buckets.map(b => {
-                return {
+            return {
                 id: b.id,
                 displayName: b.displayName,
                 minimum: b.minimum,

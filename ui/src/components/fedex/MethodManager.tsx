@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import MethodModal from './MethodModal';
 import MethodRow from './MethodRow';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faSpinner } from '@fortawesome/free-solid-svg-icons';
 import useSWR from 'swr';
+import { uniq, isEmpty } from 'lodash';
 import fetcher from '../../fetcher';
 
 interface Bucket {
@@ -17,6 +18,7 @@ interface Method {
     displayName: string;
     serviceType: string;
     groundService: string;
+    class: string;
     order: number | null;
     buckets: Bucket[];
 }
@@ -25,6 +27,11 @@ const MethodManager = () => {
     const [modalActive, setModalActive] = useState(false);
 
     const { data: methods, isValidating, mutate, revalidate } = useSWR<Method[]>('/api/fedex-shipping-methods', fetcher);
+    const [ classes, setClasses ] = useState([] as string[]);
+
+    useEffect(() => {
+        setClasses(methods ? uniq(methods.map(m => m.class).filter(v => !isEmpty(v))) : []);
+    }, [methods]);
     
     const addMethod = (method: Method) => {
         if (!methods) {
@@ -106,6 +113,7 @@ const MethodManager = () => {
                 isActive={modalActive}
                 onClose={() => setModalActive(false)}
                 upsertMethod={addMethod}
+                classes={classes}
             />
 
             <h1 className="title">Methods</h1>
@@ -116,6 +124,7 @@ const MethodManager = () => {
                         <td>Display Name</td>
                         <td>Service Type</td>
                         <td>Ground Service</td>
+                        <td>Class</td>
                         <td></td>
                         <td></td>
                         <td>
@@ -146,6 +155,7 @@ const MethodManager = () => {
                         }).map(m => (
                             <MethodRow
                                 method={m}
+                                classes={classes}
                                 editMethod={updateMethod}
                                 copyMethod={addMethod}
                                 removeMethod={removeMethod}

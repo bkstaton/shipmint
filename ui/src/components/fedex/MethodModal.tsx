@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faPlus } from '@fortawesome/free-solid-svg-icons';
+import CreatableSelect from 'react-select/creatable';
 
 interface Bucket {
     displayName: string;
@@ -13,6 +14,7 @@ interface Method {
     displayName: string;
     serviceType: string;
     groundService: string;
+    class: string;
     order: number | null;
     buckets: Bucket[];
 }
@@ -20,6 +22,7 @@ interface Method {
 interface Props {
     isActive: boolean;
     method?: Method;
+    classes: string[];
     upsertMethod: (method: Method) => void;
     onClose: () => void;
 }
@@ -29,6 +32,7 @@ const MethodModal = (props: Props) => {
         displayName: '',
         serviceType: '',
         groundService: '',
+        class: '',
         order: null,
         buckets: [] as Bucket[],
     });
@@ -42,6 +46,7 @@ const MethodModal = (props: Props) => {
             displayName: '',
             serviceType: '',
             groundService: '',
+            class: '',
             order: null,
             buckets: [],
         });
@@ -137,6 +142,22 @@ const MethodModal = (props: Props) => {
                                 />
                             </div>
                         </div>
+
+                        <div className="field">
+                            <label className="label">Class</label>
+                            <div className="control">
+                                <CreatableSelect
+                                    isClearable
+                                    defaultValue={{ label: method.class, value: method.class }}
+                                    onChange={v => setMethod({
+                                        ...method,
+                                        class: (v as {label: string, value: string}).value,
+                                    })}
+                                    options={props.classes.map(c => ({label: c, value: c}))}
+                                />
+                            </div>
+                        </div>
+
                         <table className="table">
                             <thead>
                                 <tr>

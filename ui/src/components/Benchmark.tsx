@@ -2,7 +2,7 @@ import React, { useState, ReactElement } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import useSWR from 'swr';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSpinner, faDownload } from '@fortawesome/free-solid-svg-icons';
+import { faSpinner, faDownload, faFilePdf } from '@fortawesome/free-solid-svg-icons';
 
 import DiscountTab from './benchmark/DiscountTab';
 import fetcher from '../fetcher';
@@ -82,7 +82,9 @@ const Benchmark = (props: RouteComponentProps<{ customerId: string, benchmarkId:
     return (
         <div>
             <Breadcrumb breadcrumbs={breadcrumbs} />
-            <h1 className="title">Benchmark <a href={`/api/customers/${customerId}/benchmarks/${benchmarkId}/file`} target="_blank"><FontAwesomeIcon icon={faDownload} /></a></h1>
+            <h1 className="title">Benchmark</h1>
+            <a href={`/api/customers/${customerId}/benchmarks/${benchmarkId}/file`} target="_blank"><FontAwesomeIcon icon={faDownload} /></a>
+            <a href={`/api/customers/${customerId}/benchmarks/${benchmarkId}/export`} target="_blank"><FontAwesomeIcon icon={faFilePdf} /></a>
             <div className="tabs">
                 <ul>
                     <li

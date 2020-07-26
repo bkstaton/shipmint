@@ -92,6 +92,7 @@ class BenchmarkTotal extends Model {
     public bucketOrder!: number;
     public method!: string;
     public bucket!: string;
+    public class!: string;
     public count!: number;
     public transportationCharge!: number;
     public targetDiscount!: number;
@@ -139,6 +140,7 @@ class FedexShippingMethod extends Model {
     public displayName!: string;
     public serviceType!: string;
     public groundService!: string | null;
+    public class!: string;
     public order!: number;
 
     // Relationships
@@ -224,6 +226,7 @@ BenchmarkTotal.init({
     bucketOrder: DataTypes.BIGINT.UNSIGNED,
     method: DataTypes.STRING,
     bucket: DataTypes.STRING,
+    class: DataTypes.STRING,
     count: {
         type: DataTypes.INTEGER.UNSIGNED,
         defaultValue: 0,
@@ -293,6 +296,7 @@ FedexShippingMethod.init({
     displayName: DataTypes.STRING,
     serviceType: DataTypes.STRING,
     groundService: DataTypes.STRING,
+    class: DataTypes.STRING,
     order: DataTypes.BIGINT.UNSIGNED,
 }, {
     tableName: 'fedex_shipping_methods',

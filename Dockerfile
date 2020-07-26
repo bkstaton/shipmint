@@ -35,6 +35,8 @@ COPY --from=api /srv/sequelize-cli /srv/sequelize-cli/
 COPY --from=api /srv/package.json /srv/
 COPY --from=api /srv/node_modules /srv/node_modules/
 COPY --from=api /srv/dist /srv/
+COPY --from=api /srv/src/images /srv/images
+COPY --from=api /srv/src/fonts /srv/fonts
 
 COPY --from=ui /srv/build /srv/app/build
 

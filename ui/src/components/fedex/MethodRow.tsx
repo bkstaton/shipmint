@@ -15,12 +15,14 @@ interface Method {
     displayName: string;
     serviceType: string;
     groundService: string;
+    class: string;
     order: number | null;
     buckets: Bucket[];
 }
 
 interface Props {
     method: Method;
+    classes: string[];
     editMethod: (method: Method) => void;
     copyMethod: (method: Method) => void;
     removeMethod: (method: Method) => void;
@@ -38,6 +40,7 @@ const MethodRow = (props: Props) => {
                 onClose={() => setModalActive(false)}
                 upsertMethod={props.editMethod}
                 method={props.method}
+                classes={props.classes}
             />
 
             <tr>
@@ -48,6 +51,7 @@ const MethodRow = (props: Props) => {
                 <td>{props.method.displayName}</td>
                 <td>{props.method.serviceType}</td>
                 <td>{props.method.groundService}</td>
+                <td>{props.method.class}</td>
                 <td><button className="button is-primary" onClick={() => setModalActive(true)}><FontAwesomeIcon icon={faPen} /></button></td>
                 <td><button className="button is-secondary" onClick={() => props.copyMethod(props.method)}><FontAwesomeIcon icon={faCopy} /></button></td>
                 <td>

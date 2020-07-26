@@ -141,6 +141,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
         total.count++;
         total.transportationCharge += parseCsvFloat(row[Columns.TransportationCharge]);
+        total.class = method.class;
         total.order = method.order;
 
         const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
