@@ -87,6 +87,8 @@ benchmarks.get('/:benchmarkId/export', (req: Request, res: Response) => {
             res.status(404).send();
             return;
         }
+        res.set('Content-Type', 'application/pdf')
+            .set('Content-Disposition', 'attachment; filename="Benchmark.pdf"');
 
         pdf.pipe(res);
         pdf.end();
