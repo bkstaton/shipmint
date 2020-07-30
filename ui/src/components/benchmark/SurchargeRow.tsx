@@ -41,7 +41,7 @@ const SurchargeRow = ({ surcharge, savePublishedCharge }: Props) => {
                     type="number"
                     min={0}
                     step={0.01}
-                    value={publishedCharge || ''}
+                    value={publishedCharge !== undefined ? publishedCharge : ''}
                     onChange={e => setPublishedCharge(e.target.value && e.target.value.length ? parseFloat(e.target.value) : null)}
                     onBlur={() => savePublishedCharge(surcharge.id, publishedCharge, targetDiscount)}
                 />
@@ -56,7 +56,7 @@ const SurchargeRow = ({ surcharge, savePublishedCharge }: Props) => {
                     type="number"
                     min={0}
                     step={0.01}
-                    value={targetDiscount || ''}
+                    value={targetDiscount !== undefined ? targetDiscount : ''}
                     onChange={e => setTargetDiscount(e.target.value && e.target.value.length ? parseFloat(e.target.value) : null)}
                     onBlur={() => savePublishedCharge(surcharge.id, publishedCharge, targetDiscount)}
                 />

@@ -192,6 +192,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
 
                 surcharge.count += 1;
                 surcharge.totalCharge += parseCsvFloat(row[i + 1]);
+                surcharge.publishedCharge = surcharge.totalCharge / surcharge.count;
             }
         }
     }
