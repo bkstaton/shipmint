@@ -144,7 +144,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         total.class = method.class;
         total.order = method.order;
 
-        const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYmmdd').toDate();
+        const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYMMDD').toDate();
         if (shipmentDate < minDate) {
             minDate = shipmentDate;
         }
@@ -197,7 +197,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         }
     }
 
-    benchmark.annualizationFactor = moment(maxDate).diff(moment(minDate), 'days') / 365.0;
+    benchmark.annualizationFactor = (moment(maxDate).diff(moment(minDate), 'days') + 1) / 365.0;
 
     await Promise.all(Object.values(totals).map(t => t.save()));
 
