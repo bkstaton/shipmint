@@ -2,6 +2,7 @@ import { Benchmark } from "../../../models";
 
 import PDFPrinter from 'pdfmake';
 import { Column } from "pdfmake/interfaces";
+import summarize from "../summarize";
 
 const pdf = async (customerId: string, benchmarkId: string) => {
     const benchmark = await Benchmark.findOne({
@@ -15,59 +16,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
         return null;
     }
     
-    const charges = {} as { [key: string]: any };
-    for (const total of await benchmark.getTotals()) {
-        const newTotal = charges[total.class] || {
-            class: total.class,
-            currentTotalCharge: 0,
-            currentDiscount: 0,
-            projectedDiscount: 0,
-        };
-
-        newTotal.currentTotalCharge += total.transportationCharge;
-
-        let totalDiscount = 0;
-        for (let d of await total.getDiscounts()) {
-            totalDiscount += d.amount;
-        }
-        newTotal.currentDiscount += totalDiscount;
-        newTotal.projectedDiscount -= (total.targetDiscount * total.transportationCharge / 100);
-
-        charges[total.class] = newTotal;
-    }
-
-    const surcharges = {
-        currentTotalCharge: 0,
-        currentDiscount: 0,
-        projectedDiscount: 0,
-    };
-    for (const surcharge of await benchmark.getSurcharges()) {
-        surcharges.currentTotalCharge += surcharge.totalCharge;
-        surcharges.currentDiscount += surcharge.targetDiscount;
-        surcharges.projectedDiscount -= (surcharge.totalCharge * surcharge.targetDiscount / 100);
-    }
-
-    const totals = {
-        transportationCharge: 0,
-        currentNetCharge: 0,
-        currentDiscount: 0,
-        projectedNetCharge: 0,
-        projectedDiscount: 0,
-    }
-
-    for (const charge of Object.values(charges)) {
-        totals.transportationCharge += charge.currentTotalCharge;
-        totals.currentNetCharge += (charge.currentTotalCharge + charge.currentDiscount);
-        totals.currentDiscount += charge.currentDiscount;
-        totals.projectedNetCharge += (charge.currentTotalCharge + charge.projectedDiscount);
-        totals.projectedDiscount += charge.projectedDiscount;
-    }
-
-    totals.transportationCharge += surcharges.currentTotalCharge;
-    totals.currentNetCharge += surcharges.currentTotalCharge + surcharges.currentDiscount;
-    totals.currentDiscount += surcharges.currentDiscount;
-    totals.projectedNetCharge += surcharges.currentTotalCharge + surcharges.projectedDiscount;
-    totals.projectedDiscount += surcharges.projectedDiscount;
+    const charges = await summarize(benchmark);
 
     const doc = new PDFPrinter({
         Raleway: {
@@ -79,6 +28,19 @@ const pdf = async (customerId: string, benchmarkId: string) => {
     const formatMoney = (money: number) => {
         return money.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     };
+
+    const groundCharge = charges.charges.find((c) => {
+        return c.type === 'FedEx Ground';
+    });
+    const expressCharge = charges.charges.find((c) => {
+        return c.type === 'FedEx Express';
+    });
+    const surchargeCharge = charges.charges.find((c) => {
+        return c.type === 'Surcharges';
+    });
+
+    const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
+    const targetDiscount = 100.0 * targetDelta / charges.grossTotal.annualization;
 
     const docDefinition = {
         content: [
@@ -116,22 +78,28 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             { text: 'Annualization', style: 'tableHeader'},
                             { text: '', style: 'tableHeader'},
                         ],
-                        ...Object.values(charges).map(t => [
-                            t.class,
-                            { text: '$' + formatMoney(t.currentTotalCharge), style: 'moneyCell' },
-                            { text: '$' + formatMoney(t.currentTotalCharge / benchmark.annualizationFactor), style: 'moneyCell' },
+                        [
+                            'FedEx Ground',
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.grossCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.grossCharge.annualization : 0), style: 'moneyCell' },
                             '',
-                        ]),
+                        ],
+                        [
+                            'FedEx Express',
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.grossCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.grossCharge.annualization : 0), style: 'moneyCell' },
+                            '',
+                        ],
                         [
                             'Fees and Surcharges',
-                            { text: '$' + formatMoney(surcharges.currentTotalCharge), style: 'moneyCell' },
-                            { text: '$' + formatMoney(surcharges.currentTotalCharge / benchmark.annualizationFactor), style: 'moneyCell' },
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.grossCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.grossCharge.annualization : 0), style: 'moneyCell' },
                             '',
                         ],
                         [
                             { text: 'Total', style: 'tableTotal' },
-                            { text: '$' + formatMoney(totals.transportationCharge), style: ['moneyCell', 'tableTotal']},
-                            { text: '$' + formatMoney(totals.transportationCharge / benchmark.annualizationFactor), style: ['moneyCell', 'tableTotal'] },
+                            { text: '$' + formatMoney(charges.grossTotal.sample), style: ['moneyCell', 'tableTotal']},
+                            { text: '$' + formatMoney(charges.grossTotal.annualization), style: ['moneyCell', 'tableTotal'] },
                             '',
                         ],
                     ],
@@ -150,23 +118,29 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             { text: 'Annualization', style: 'tableHeader'},
                             { text: 'Discounts', style: 'tableHeader'},
                         ],
-                        ...Object.values(charges).map(t => [
-                            t.class,
-                            { text: '$' + formatMoney(t.currentDiscount + t.currentTotalCharge), style: 'moneyCell' },
-                            { text: '$' + formatMoney((t.currentDiscount + t.currentTotalCharge) / benchmark.annualizationFactor), style: 'moneyCell' },
-                            { text: (-1 * t.currentDiscount / t.currentTotalCharge * 100).toFixed(1) + '%', style: 'discountCell' },
-                        ]),
+                        [
+                            'FedEx Ground',
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.netCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (groundCharge ? groundCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
+                        ],
+                        [
+                            'FedEx Express',
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.netCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (expressCharge ? expressCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
+                        ],
                         [
                             'Fees and Surcharges',
-                            { text: '$' + formatMoney(surcharges.currentDiscount + surcharges.currentTotalCharge), style: 'moneyCell' },
-                            { text: '$' + formatMoney((surcharges.currentDiscount + surcharges.currentTotalCharge) / benchmark.annualizationFactor), style: 'moneyCell' },
-                            { text: (-1 * surcharges.currentDiscount / surcharges.currentTotalCharge * 100).toFixed(1) + '%', style: 'discountCell' },
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.netCharge.sample : 0), style: 'moneyCell' },
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (surchargeCharge ? surchargeCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             { text: 'Subtotal', style: 'tableTotal' },
-                            { text: '$' + formatMoney(totals.currentNetCharge), style: ['moneyCell', 'tableTotal'] },
-                            { text: '$' + formatMoney(totals.currentNetCharge / benchmark.annualizationFactor), style: ['moneyCell', 'tableTotal'] },
-                            { text: (-1 * totals.currentDiscount / totals.currentNetCharge * 100).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
+                            { text: '$' + formatMoney(charges.netTotal.sample), style: ['moneyCell', 'tableTotal'] },
+                            { text: '$' + formatMoney(charges.netTotal.annualization), style: ['moneyCell', 'tableTotal'] },
+                            { text: (charges.netTotal.discount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
                     ]
                 },
@@ -184,23 +158,29 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             { text: 'Annualization', style: 'tableHeader'},
                             { text: 'Discounts', style: 'tableHeader'},
                         ],
-                        ...Object.values(charges).map(t => [
-                            t.class,
+                        [
+                            'FedEx Ground',
                             '',
-                            { text: '$' + formatMoney((t.projectedDiscount + t.currentTotalCharge) / benchmark.annualizationFactor), style: 'moneyCell' },
-                            { text: (-1 * t.projectedDiscount / t.currentTotalCharge * 100).toFixed(1) + '%', style: 'discountCell' },
-                        ]),
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (groundCharge ? groundCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
+                        ],
+                        [
+                            'FedEx Express',
+                            '',
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (expressCharge ? expressCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
+                        ],
                         [
                             'Fees and Surcharges',
                             '',
-                            { text: '$' + formatMoney((surcharges.projectedDiscount + surcharges.currentTotalCharge) / benchmark.annualizationFactor), style: 'moneyCell' },
-                            { text: (-1 * surcharges.projectedDiscount / surcharges.currentTotalCharge * 100).toFixed(1) + '%', style: 'discountCell' },
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            { text: (surchargeCharge ? surchargeCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             { text: 'Total', style: 'tableTotal' },
                             '',
-                            { text: '$' + formatMoney(totals.projectedNetCharge / benchmark.annualizationFactor), style: ['moneyCell', 'tableTotal'] },
-                            { text: (-1 * totals.projectedDiscount / totals.projectedNetCharge * 100).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
+                            { text: '$' + formatMoney(charges.projectedTotal.annualization), style: ['moneyCell', 'tableTotal'] },
+                            { text: (charges.projectedTotal.discount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
                     ]
                 },
@@ -221,8 +201,8 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         [
                             { text: 'Target Delta', style: 'tableTotal' },
                             '',
-                            { text: '$' + formatMoney((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor), style: ['moneyCell', 'tableTotal'] },
-                            { text: ((totals.currentDiscount - totals.projectedDiscount) / totals.currentNetCharge * 100).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
+                            { text: '$' + formatMoney(targetDelta), style: ['moneyCell', 'tableTotal'] },
+                            { text: (targetDiscount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
                     ]
                 },
@@ -243,7 +223,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         [
                             'ShipMint Fee',
                             '',
-                            { text: '$' + formatMoney((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30), style: 'moneyCell' },
+                            { text: '$' + formatMoney(targetDelta * 0.30), style: 'moneyCell' },
                             { text: '30%', style: 'discountCell' },
                         ],
                     ]
@@ -266,16 +246,11 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             'Net Savings (Year 1)',
                             '',
                             {
-                                text: '$' + formatMoney(
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)
-                                ),
+                                text: '$' + formatMoney(targetDelta * 0.7),
                                 style: 'moneyCell',
                             },
                             {
-                                text: ((((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)) /
-                                    totals.currentNetCharge * 100).toFixed(1) + '%',
+                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
                                 style: 'discountCell',
                             },
                         ],
@@ -283,16 +258,11 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             'Net Savings (Year 2)',
                             '',
                             {
-                                text: '$' + formatMoney(
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)
-                                ),
+                                text: '$' + formatMoney(targetDelta * 0.7),
                                 style: 'moneyCell',
                             },
                             {
-                                text: ((((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)) /
-                                    totals.currentNetCharge * 100).toFixed(1) + '%',
+                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
                                 style: 'discountCell',
                             },
                         ],
@@ -300,16 +270,11 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             'Net Savings (Year 3)',
                             '',
                             {
-                                text: '$' + formatMoney(
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)
-                                ),
+                                text: '$' + formatMoney(targetDelta * 0.7),
                                 style: 'moneyCell',
                             },
                             {
-                                text: ((((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)) /
-                                    totals.currentNetCharge * 100).toFixed(1) + '%',
+                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
                                 style: 'discountCell',
                             },
                         ],
@@ -327,15 +292,11 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                             { text: 'Total Savings (3-year Term)', style: ['tableHeader', 'summaryCell']},
                             { text: '', style: ['tableHeader', 'summaryCell']},
                             {
-                                text: '$' + formatMoney((((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)) *
-                                    3),
+                                text: '$' + formatMoney(targetDelta * 0.7 * 3),
                                     style: ['moneyCell', 'tableHeader', 'summaryCell'],
                             },
                             {
-                                text: ((((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor) -
-                                    ((totals.currentDiscount - totals.projectedDiscount) / benchmark.annualizationFactor * 0.30)) /
-                                    totals.currentNetCharge * 100).toFixed(1) + '%',
+                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
                                     style: ['discountCell', 'tableHeader', 'summaryCell'],
                             },
                         ],
