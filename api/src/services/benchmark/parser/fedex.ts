@@ -9,6 +9,7 @@ export enum Columns {
     Weight = 20,
     TransportationCharge = 9,
     FirstDiscountStart = 105,
+    InvoiceDate = 1,
     ShipmentDate = 13,
 }
 
@@ -144,7 +145,7 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         total.class = method.class;
         total.order = method.order;
 
-        const shipmentDate = moment(row[Columns.ShipmentDate], 'YYYYMMDD').toDate();
+        const shipmentDate = moment(row[Columns.InvoiceDate], 'YYYYMMDD').toDate();
         if (shipmentDate < minDate) {
             minDate = shipmentDate;
         }
@@ -197,7 +198,11 @@ const fedexParse = async (customerId: string, data: Buffer): Promise<Benchmark> 
         }
     }
 
-    benchmark.annualizationFactor = (moment(maxDate).diff(moment(minDate), 'days') + 1) / 365.0;
+    const start = moment(minDate).startOf('week');
+    // Add one day so it is another full week ahead of the start rather than just 6 days
+    const end = moment(maxDate).endOf('week').add(1, 'day');
+
+    benchmark.annualizationFactor = end.diff(start, 'weeks') / 52.0;
 
     await Promise.all(Object.values(totals).map(t => t.save()));
 
