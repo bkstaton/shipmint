@@ -8,6 +8,9 @@ import {
     HasManyCountAssociationsMixin,
     HasManyCreateAssociationMixin,
     Association,
+    BelongsToGetAssociationMixin,
+    BelongsToSetAssociationMixin,
+    BelongsToCreateAssociationMixin,
 } from "sequelize";
 
 const sequelize = new Sequelize(process.env.CONNECTION_STRING || '');
@@ -73,7 +76,12 @@ class Benchmark extends Model {
     public countSurcharges!: HasManyCountAssociationsMixin;
     public createSurcharges!: HasManyCreateAssociationMixin<BenchmarkSurcharge>;
 
+    public getCustomer!: BelongsToGetAssociationMixin<Customer>;
+    public setCustomer!: BelongsToSetAssociationMixin<Customer, number>;
+    public createCustomer!: BelongsToCreateAssociationMixin<Customer>;
+
     public static associations: {
+        customer: Association<Benchmark, Customer>;
         totals: Association<Benchmark, BenchmarkTotal>;
         discounts: Association<Benchmark, BenchmarkDiscount>;
         surcharges: Association<Benchmark, BenchmarkSurcharge>;

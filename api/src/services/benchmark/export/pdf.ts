@@ -40,7 +40,6 @@ const pdf = async (customerId: string, benchmarkId: string) => {
     });
 
     const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
-    const targetDiscount = 100.0 * targetDelta / charges.grossTotal.annualization;
 
     const docDefinition = {
         content: [
@@ -56,15 +55,22 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         ],
                         width: '*',
                     } as Column,
-                    {
-                        text: 'Projection Summary',
-                        width: '*',
-                        style: {
-                            bold: true,
-                            fontSize: 16,
+                    [
+                        {
+                            text: (await benchmark.getCustomer()).name,
+                            style: {
+                                bold: true,
+                                fontSize: 18,
+                            },
                         },
-                        margin: [0, 30, 0, 0] as [number, number, number, number],
-                    } as Column,
+                        {
+                            text: 'FedEx Benchmark',
+                            style: {
+                                bold: true,
+                                fontSize: 14,
+                            },
+                        }
+                    ],
                 ]
             },
             {
@@ -75,7 +81,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         [
                             { text: 'Current Transportation Charge Amount (Gross)', style: 'tableHeader'},
                             { text: 'Sample', style: 'tableHeader'},
-                            { text: 'Annualization', style: 'tableHeader'},
+                            { text: 'Annualized', style: 'tableHeader'},
                             { text: '', style: 'tableHeader'},
                         ],
                         [
@@ -115,7 +121,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         [
                             { text: 'Current Net Charge Amount', style: 'tableHeader'},
                             { text: 'Sample', style: 'tableHeader'},
-                            { text: 'Annualization', style: 'tableHeader'},
+                            { text: 'Annualized', style: 'tableHeader'},
                             { text: 'Discounts', style: 'tableHeader'},
                         ],
                         [
@@ -155,30 +161,30 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                         [
                             { text: 'Projected Net Charge Amount', style: 'tableHeader'},
                             { text: '', style: 'tableHeader'},
-                            { text: 'Annualization', style: 'tableHeader'},
+                            { text: 'Annualized', style: 'tableHeader'},
                             { text: 'Discounts', style: 'tableHeader'},
                         ],
                         [
                             'FedEx Ground',
-                            '',
+                            { text: '$' + formatMoney(groundCharge ? groundCharge.projectedCharge.sample : 0), style: 'moneyCell' },
                             { text: '$' + formatMoney(groundCharge ? groundCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
                             { text: (groundCharge ? groundCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'FedEx Express',
-                            '',
+                            { text: '$' + formatMoney(expressCharge ? expressCharge.projectedCharge.sample : 0), style: 'moneyCell' },
                             { text: '$' + formatMoney(expressCharge ? expressCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
                             { text: (expressCharge ? expressCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'Fees and Surcharges',
-                            '',
+                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.projectedCharge.sample : 0), style: 'moneyCell' },
                             { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
                             { text: (surchargeCharge ? surchargeCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             { text: 'Total', style: 'tableTotal' },
-                            '',
+                            { text: '$' + formatMoney(charges.projectedTotal.sample), style: ['moneyCell', 'tableTotal'] },
                             { text: '$' + formatMoney(charges.projectedTotal.annualization), style: ['moneyCell', 'tableTotal'] },
                             { text: (charges.projectedTotal.discount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
@@ -193,106 +199,10 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                     widths: ['*', '15%', '15%', '15%'],
                     body: [
                         [
-                            { text: 'Gross Cost Savings', style: 'tableHeader'},
-                            { text: '', style: 'tableHeader'},
-                            { text: 'Annualization', style: 'tableHeader'},
-                            { text: 'Percentage', style: 'tableHeader'},
-                        ],
-                        [
-                            { text: 'Target Delta', style: 'tableTotal' },
-                            '',
-                            { text: '$' + formatMoney(targetDelta), style: ['moneyCell', 'tableTotal'] },
-                            { text: (targetDiscount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
-                        ],
-                    ]
-                },
-                layout: 'default',
-                margin: [0, 0, 0, 10] as [number, number, number, number],
-            },
-            {
-                table: {
-                    headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
-                    body: [
-                        [
-                            { text: 'Fees/Commissions', style: 'tableHeader'},
-                            { text: '', style: 'tableHeader'},
-                            { text: 'Estimated', style: 'tableHeader'},
-                            { text: 'Gain Share', style: 'tableHeader'},
-                        ],
-                        [
-                            'ShipMint Fee',
-                            '',
-                            { text: '$' + formatMoney(targetDelta * 0.30), style: 'moneyCell' },
-                            { text: '30%', style: 'discountCell' },
-                        ],
-                    ]
-                },
-                layout: 'default',
-                margin: [0, 0, 0, 10] as [number, number, number, number],
-            },
-            {
-                table: {
-                    headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
-                    body: [
-                        [
-                            { text: 'Projected Net Cost Savings', style: 'tableHeader'},
-                            { text: '', style: 'tableHeader'},
-                            { text: 'Annualization', style: 'tableHeader'},
-                            { text: 'Percentage', style: 'tableHeader'},
-                        ],
-                        [
-                            'Net Savings (Year 1)',
-                            '',
-                            {
-                                text: '$' + formatMoney(targetDelta * 0.7),
-                                style: 'moneyCell',
-                            },
-                            {
-                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
-                                style: 'discountCell',
-                            },
-                        ],
-                        [
-                            'Net Savings (Year 2)',
-                            '',
-                            {
-                                text: '$' + formatMoney(targetDelta * 0.7),
-                                style: 'moneyCell',
-                            },
-                            {
-                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
-                                style: 'discountCell',
-                            },
-                        ],
-                        [
-                            'Net Savings (Year 3)',
-                            '',
-                            {
-                                text: '$' + formatMoney(targetDelta * 0.7),
-                                style: 'moneyCell',
-                            },
-                            {
-                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
-                                style: 'discountCell',
-                            },
-                        ],
-                    ]
-                },
-                layout: 'default',
-                margin: [0, 0, 0, 10] as [number, number, number, number],
-            },
-            {
-                table: {
-                    headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
-                    body: [
-                        [
-                            { text: 'Total Savings (3-year Term)', style: ['tableHeader', 'summaryCell']},
+                            { text: 'Projected Annual Savings', style: ['tableHeader', 'summaryCell']},
                             { text: '', style: ['tableHeader', 'summaryCell']},
                             {
-                                text: '$' + formatMoney(targetDelta * 0.7 * 3),
+                                text: '$' + formatMoney(targetDelta * 0.7),
                                     style: ['moneyCell', 'tableHeader', 'summaryCell'],
                             },
                             {
