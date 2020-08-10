@@ -29,6 +29,43 @@ const pdf = async (customerId: string, benchmarkId: string) => {
         return money.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
     };
 
+    const moneyCell = (money: number): Column => {
+        return {
+            columns: [
+                {
+                    text: '$',
+                    width: 'auto',
+                },
+                {
+                    text: formatMoney(money),
+                    width: '*',
+                    alignment: 'right' as 'right',
+                    margin: [0, 0, 0, 0],
+                },
+            ],
+            width: '*',
+        };
+    };
+
+    const moneySummary = (money: number): Column => {
+        return {
+            columns: [
+                {
+                    text: '$',
+                    width: 'auto',
+                },
+                {
+                    text: formatMoney(money),
+                    width: '*',
+                    alignment: 'right' as 'right',
+                    margin: [0, 0, 0, 0],
+                },
+            ],
+            width: '*',
+            style: ['summaryCell'],
+        };
+    };
+
     const groundCharge = charges.charges.find((c) => {
         return c.type === 'FedEx Ground';
     });
@@ -39,6 +76,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
         return c.type === 'Surcharges';
     });
 
+    const sampleTargetDelta = charges.netTotal.sample - charges.projectedTotal.sample;
     const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
 
     const docDefinition = {
@@ -76,36 +114,36 @@ const pdf = async (customerId: string, benchmarkId: string) => {
             {
                 table: {
                     headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
+                    widths: ['*', '17.5%', '17.5%', '15%'],
                     body: [
                         [
                             { text: 'Current Transportation Charge Amount (Gross)', style: 'tableHeader'},
-                            { text: 'Sample', style: 'tableHeader'},
-                            { text: 'Annualized', style: 'tableHeader'},
-                            { text: '', style: 'tableHeader'},
+                            { text: 'Sample', style: ['tableHeader', 'centered']},
+                            { text: 'Annualized', style: ['tableHeader', 'centered']},
+                            { text: '', style: ['tableHeader', 'centered']},
                         ],
                         [
                             'FedEx Ground',
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.grossCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.grossCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(groundCharge ? groundCharge.grossCharge.sample : 0),
+                            moneyCell(groundCharge ? groundCharge.grossCharge.annualization : 0),
                             '',
                         ],
                         [
                             'FedEx Express',
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.grossCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.grossCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(expressCharge ? expressCharge.grossCharge.sample : 0),
+                            moneyCell(expressCharge ? expressCharge.grossCharge.annualization : 0),
                             '',
                         ],
                         [
                             'Fees and Surcharges',
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.grossCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.grossCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(surchargeCharge ? surchargeCharge.grossCharge.sample : 0),
+                            moneyCell(surchargeCharge ? surchargeCharge.grossCharge.annualization : 0),
                             '',
                         ],
                         [
                             { text: 'Total', style: 'tableTotal' },
-                            { text: '$' + formatMoney(charges.grossTotal.sample), style: ['moneyCell', 'tableTotal']},
-                            { text: '$' + formatMoney(charges.grossTotal.annualization), style: ['moneyCell', 'tableTotal'] },
+                            moneyCell(charges.grossTotal.sample),
+                            moneyCell(charges.grossTotal.annualization),
                             '',
                         ],
                     ],
@@ -116,36 +154,36 @@ const pdf = async (customerId: string, benchmarkId: string) => {
             {
                 table: {
                     headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
+                    widths: ['*', '17.5%', '17.5%', '15%'],
                     body: [
                         [
                             { text: 'Current Net Charge Amount', style: 'tableHeader'},
-                            { text: 'Sample', style: 'tableHeader'},
-                            { text: 'Annualized', style: 'tableHeader'},
-                            { text: 'Discounts', style: 'tableHeader'},
+                            { text: 'Sample', style: ['tableHeader', 'centered']},
+                            { text: 'Annualized', style: ['tableHeader', 'centered']},
+                            { text: 'Discounts', style: ['tableHeader', 'centered']},
                         ],
                         [
                             'FedEx Ground',
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.netCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(groundCharge ? groundCharge.netCharge.sample : 0),
+                            moneyCell(groundCharge ? groundCharge.netCharge.annualization : 0),
                             { text: (groundCharge ? groundCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'FedEx Express',
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.netCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(expressCharge ? expressCharge.netCharge.sample : 0),
+                            moneyCell(expressCharge ? expressCharge.netCharge.annualization : 0),
                             { text: (expressCharge ? expressCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'Fees and Surcharges',
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.netCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.netCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(surchargeCharge ? surchargeCharge.netCharge.sample : 0),
+                            moneyCell(surchargeCharge ? surchargeCharge.netCharge.annualization : 0),
                             { text: (surchargeCharge ? surchargeCharge.netCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             { text: 'Subtotal', style: 'tableTotal' },
-                            { text: '$' + formatMoney(charges.netTotal.sample), style: ['moneyCell', 'tableTotal'] },
-                            { text: '$' + formatMoney(charges.netTotal.annualization), style: ['moneyCell', 'tableTotal'] },
+                            moneyCell(charges.netTotal.sample),
+                            moneyCell(charges.netTotal.annualization),
                             { text: (charges.netTotal.discount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
                     ]
@@ -156,36 +194,36 @@ const pdf = async (customerId: string, benchmarkId: string) => {
             {
                 table: {
                     headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
+                    widths: ['*', '17.5%', '17.5%', '15%'],
                     body: [
                         [
                             { text: 'Projected Net Charge Amount', style: 'tableHeader'},
-                            { text: '', style: 'tableHeader'},
-                            { text: 'Annualized', style: 'tableHeader'},
-                            { text: 'Discounts', style: 'tableHeader'},
+                            { text: 'Sample', style: ['tableHeader', 'centered']},
+                            { text: 'Annualized', style: ['tableHeader', 'centered']},
+                            { text: 'Discounts', style: ['tableHeader', 'centered']},
                         ],
                         [
                             'FedEx Ground',
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.projectedCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(groundCharge ? groundCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(groundCharge ? groundCharge.projectedCharge.sample : 0),
+                            moneyCell(groundCharge ? groundCharge.projectedCharge.annualization : 0),
                             { text: (groundCharge ? groundCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'FedEx Express',
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.projectedCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(expressCharge ? expressCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(expressCharge ? expressCharge.projectedCharge.sample : 0),
+                            moneyCell(expressCharge ? expressCharge.projectedCharge.annualization : 0),
                             { text: (expressCharge ? expressCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             'Fees and Surcharges',
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.projectedCharge.sample : 0), style: 'moneyCell' },
-                            { text: '$' + formatMoney(surchargeCharge ? surchargeCharge.projectedCharge.annualization : 0), style: 'moneyCell' },
+                            moneyCell(surchargeCharge ? surchargeCharge.projectedCharge.sample : 0),
+                            moneyCell(surchargeCharge ? surchargeCharge.projectedCharge.annualization : 0),
                             { text: (surchargeCharge ? surchargeCharge.projectedCharge.discount : 0).toFixed(1) + '%', style: 'discountCell' },
                         ],
                         [
                             { text: 'Total', style: 'tableTotal' },
-                            { text: '$' + formatMoney(charges.projectedTotal.sample), style: ['moneyCell', 'tableTotal'] },
-                            { text: '$' + formatMoney(charges.projectedTotal.annualization), style: ['moneyCell', 'tableTotal'] },
+                            moneyCell(charges.projectedTotal.sample),
+                            moneyCell(charges.projectedTotal.annualization),
                             { text: (charges.projectedTotal.discount).toFixed(1) + '%', style: ['discountCell', 'tableTotal'] },
                         ],
                     ]
@@ -196,24 +234,20 @@ const pdf = async (customerId: string, benchmarkId: string) => {
             {
                 table: {
                     headerRows: 1,
-                    widths: ['*', '15%', '15%', '15%'],
+                    widths: ['*', '17.5%', '17.5%', '15%'],
                     body: [
                         [
-                            { text: 'Projected Annual Savings', style: ['tableHeader', 'summaryCell']},
-                            { text: '', style: ['tableHeader', 'summaryCell']},
+                            { text: 'Projected Annual Savings', style: ['summaryCell']},
+                            moneySummary(sampleTargetDelta),
+                            moneySummary(targetDelta),
                             {
-                                text: '$' + formatMoney(targetDelta * 0.7),
-                                    style: ['moneyCell', 'tableHeader', 'summaryCell'],
-                            },
-                            {
-                                text: (targetDelta * 0.7 / charges.netTotal.annualization * 100).toFixed(1) + '%',
-                                    style: ['discountCell', 'tableHeader', 'summaryCell'],
+                                text: (targetDelta / charges.netTotal.annualization * 100).toFixed(1) + '%',
+                                style: ['discountCell', 'summaryCell'],
                             },
                         ],
                     ]
                 },
                 layout: 'summary',
-                margin: [0, 0, 0, 10] as [number, number, number, number],
             },
         ],
         defaultStyle: {
@@ -226,19 +260,22 @@ const pdf = async (customerId: string, benchmarkId: string) => {
             tableHeader: {
                 color: 'white',
                 bold: true,
+                margin: [0, 2, 0, 0] as [number, number, number, number],
+            },
+            centered: {
+                alignment: 'center' as 'center',
             },
             tableTotal: {
                 bold: true,
-            },
-            moneyCell: {
-                alignment: 'right' as 'right',
             },
             discountCell: {
                 alignment: 'center' as 'center',
             },
             summaryCell: {
-                lineHeight: 2,
-                fontSize: 10.5,
+                color: 'white',
+                bold: true,
+                lineHeight: 1.5,
+                margin: [0, 6, 0, 0] as [number, number, number, number],
             },
         },
         pageMargins: 54,

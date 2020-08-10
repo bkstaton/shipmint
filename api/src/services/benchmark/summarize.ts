@@ -30,7 +30,6 @@ interface BenchmarkSummary {
     grossTotal: GrossCharge;
     netTotal: NetCharge;
     projectedTotal: ProjectedCharge;
-    shipmintFee: number;
 }
 
 const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
@@ -143,7 +142,6 @@ const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
         grossTotal,
         netTotal,
         projectedTotal,
-        shipmintFee: 0,
     };
 };
 
