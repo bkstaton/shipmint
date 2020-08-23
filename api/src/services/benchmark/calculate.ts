@@ -1,4 +1,5 @@
 import { Benchmark } from "../../models";
+import summarize, { BenchmarkSummary } from "./summarize";
 
 interface CalculatedDiscount {
     type: string;
@@ -29,6 +30,7 @@ interface CalculatedSurcharge {
 
 export interface CalculatedBenchmark {
     id: number;
+    summary: BenchmarkSummary;
     annualizationFactor: number;
     file: string;
     totals: CalculatedTotal[];
@@ -72,6 +74,7 @@ const calculate = async (benchmark: Benchmark): Promise<CalculatedBenchmark> => 
 
     return {
         id: benchmark.id,
+        summary: await summarize(benchmark),
         annualizationFactor: benchmark.annualizationFactor,
         file: benchmark.file,
         totals: calculatedTotals,

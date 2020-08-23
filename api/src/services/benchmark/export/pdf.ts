@@ -72,9 +72,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
     const expressCharge = charges.charges.find((c) => {
         return c.type === 'FedEx Express';
     });
-    const surchargeCharge = charges.charges.find((c) => {
-        return c.type === 'Surcharges';
-    });
+    const surchargeCharge = charges.surcharges;
 
     const sampleTargetDelta = charges.netTotal.sample - charges.projectedTotal.sample;
     const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
