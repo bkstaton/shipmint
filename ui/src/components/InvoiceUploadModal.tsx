@@ -8,7 +8,7 @@ interface Props {
     onClose: () => void;
 }
 
-const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
+const InvoiceUploadModal = ({ customerId, isActive, onClose }: Props) => {
     const fileRef = useRef<HTMLInputElement>(null);
 
     const history = useHistory();
@@ -26,21 +26,21 @@ const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
         formData.append('report', fileRef.current.files[0]);
 
         try {
-            const data = await fetcher(
-                `/api/customers/${customerId}/benchmarks`,
+            await fetcher(
+                `/api/customers/${customerId}/shipments`,
                 {
                     method: 'POST',
                     body: formData,
                 }
             );
-
-            history.push(`/customers/${customerId}/benchmarks/${data.id}`);
         }
         catch (e) {
-            window.alert('Parsing the benchmark failed. ' + e.message);
+            window.alert('Error parsing the invoice upload. ' + e.message);
         }
 
         setLoading(false);
+
+        onClose();
     };
 
     return (
@@ -64,4 +64,4 @@ const BenchmarkUploadModal = ({ customerId, isActive, onClose }: Props) => {
     );
 };
 
-export default BenchmarkUploadModal;
+export default InvoiceUploadModal;

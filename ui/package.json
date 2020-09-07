@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@creativebulma/bulma-tooltip": "^1.2.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.30",
     "@fortawesome/free-solid-svg-icons": "^5.14.0",
     "@fortawesome/react-fontawesome": "^0.1.11",
@@ -44,7 +45,7 @@
     "@types/lodash": "^4.14.157",
     "@types/react-router-dom": "^5.1.5",
     "@types/react-select": "^3.0.14",
-    "bulma": "^0.8.2",
+    "bulma": "^0.9",
     "typescript": "^3.9.7"
   }
 }

@@ -1,22 +1,19 @@
-import { Benchmark } from "../../../models";
+import { Carrier, Customer } from "../../../models";
 
 import PDFPrinter from 'pdfmake';
 import { Column } from "pdfmake/interfaces";
-import summarize from "../summarize";
+import summarize from "../../customer/summary";
+import calculate from "../../customer/summary/calculate";
 
-const pdf = async (customerId: string, benchmarkId: string) => {
-    const benchmark = await Benchmark.findOne({
-        where: {
-            id: benchmarkId,
-            customerId,
-        }
-    });
-
-    if (benchmark === null) {
-        return null;
+const pdf = async (customerId: string) => {
+    const customer = await Customer.findByPk(customerId);
+    if (!customer) {
+        throw new Error('Customer not found');
     }
-    
-    const charges = await summarize(benchmark);
+
+    const shipmentSummary = await calculate(customerId, Carrier.FedEx);
+
+    const charges = await summarize(shipmentSummary);
 
     const doc = new PDFPrinter({
         Raleway: {
@@ -66,13 +63,13 @@ const pdf = async (customerId: string, benchmarkId: string) => {
         };
     };
 
-    const groundCharge = charges.charges.find((c) => {
+    const groundCharge = charges.transportationCharges.find((c) => {
         return c.type === 'FedEx Ground';
     });
-    const expressCharge = charges.charges.find((c) => {
+    const expressCharge = charges.transportationCharges.find((c) => {
         return c.type === 'FedEx Express';
     });
-    const surchargeCharge = charges.surcharges;
+    const surchargeCharge = charges.surchargeTotal;
 
     const sampleTargetDelta = charges.netTotal.sample - charges.projectedTotal.sample;
     const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
@@ -93,7 +90,7 @@ const pdf = async (customerId: string, benchmarkId: string) => {
                     } as Column,
                     [
                         {
-                            text: (await benchmark.getCustomer()).name,
+                            text: customer.name,
                             style: {
                                 bold: true,
                                 fontSize: 18,

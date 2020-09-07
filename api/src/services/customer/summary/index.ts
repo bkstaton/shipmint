@@ -1,4 +1,4 @@
-import { Benchmark } from "../../models";
+import { ShipmentSummary } from "./calculate";
 
 interface GrossCharge {
     sample: number;
@@ -17,33 +17,27 @@ interface ProjectedCharge {
     discount: number;
 }
 
-interface BenchmarkSurcharge {
+interface CustomerCharge {
+    type: string;
     count: number;
     grossCharge: GrossCharge;
     netCharge: NetCharge;
     projectedCharge: ProjectedCharge;
 }
 
-type BenchmarkCharge = BenchmarkSurcharge & {
-    type: string;
-    method: string;
-};
-
-export interface BenchmarkSummary {
-    id: number;
-    charges: BenchmarkCharge[];
-    surcharges: BenchmarkCharge;
-    countTotal: number;
+interface CustomerSummary {
+    count: number;
+    transportationCharges: CustomerCharge[];
+    surchargeTotal: CustomerCharge;
     grossTotal: GrossCharge;
     netTotal: NetCharge;
     projectedTotal: ProjectedCharge;
 }
 
-const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
-    const charges = {} as { [key: string]: BenchmarkCharge };
-    for (const total of await benchmark.getTotals()) {
-        const newCharge = charges[total.method] || {
-            method: total.method,
+const summarize = async (shipmentSummary: ShipmentSummary): Promise<CustomerSummary> => {
+    const charges = {} as { [key: string]: CustomerCharge };
+    for (const total of shipmentSummary.totals) {
+        const newCharge = charges[total.class] || {
             type: total.class,
             count: 0,
             grossCharge: {
@@ -60,22 +54,22 @@ const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
                 annualization: 0,
                 discount: 0,
             },
-        } as BenchmarkCharge;
+        } as CustomerCharge;
 
         newCharge.count += total.count;
 
         const sampleGrossCharge = total.transportationCharge;
-        const annualizedGrossCharge = (total.transportationCharge / benchmark.annualizationFactor);
+        const annualizedGrossCharge = (total.transportationCharge / shipmentSummary.annualizationFactor);
 
         newCharge.grossCharge.sample += sampleGrossCharge;
         newCharge.grossCharge.annualization += annualizedGrossCharge;
 
         let totalDiscount = 0;
-        for (let d of await total.getDiscounts()) {
+        for (let d of total.discounts) {
             totalDiscount += d.amount;
         }
         newCharge.netCharge.sample += (total.transportationCharge + totalDiscount);
-        newCharge.netCharge.annualization += ((total.transportationCharge + totalDiscount) / benchmark.annualizationFactor);
+        newCharge.netCharge.annualization += ((total.transportationCharge + totalDiscount) / shipmentSummary.annualizationFactor);
 
         newCharge.projectedCharge.sample += (sampleGrossCharge - (total.targetDiscount / 100) * sampleGrossCharge);
         newCharge.projectedCharge.annualization += (annualizedGrossCharge - (total.targetDiscount / 100) * annualizedGrossCharge);
@@ -83,7 +77,7 @@ const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
         charges[total.class] = newCharge;
     }
 
-    const surcharges = {
+    const surchargeTotal = {
         grossCharge: {
             sample: 0,
             annualization: 0,
@@ -98,19 +92,19 @@ const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
             annualization: 0,
             discount: 0,
         },
-    } as BenchmarkCharge;
-    for (const surcharge of await benchmark.getSurcharges()) {
+    } as CustomerCharge;
+    for (const surcharge of shipmentSummary.surcharges) {
         const sampleGrossCharge = (surcharge.publishedCharge * surcharge.count);
-        const annualizedGrossCharge = (sampleGrossCharge / benchmark.annualizationFactor);
+        const annualizedGrossCharge = (sampleGrossCharge / shipmentSummary.annualizationFactor);
 
-        surcharges.grossCharge.sample += sampleGrossCharge;
-        surcharges.grossCharge.annualization += annualizedGrossCharge;
+        surchargeTotal.grossCharge.sample += sampleGrossCharge;
+        surchargeTotal.grossCharge.annualization += annualizedGrossCharge;
 
-        surcharges.netCharge.sample += surcharge.totalCharge;
-        surcharges.netCharge.annualization += (surcharge.totalCharge / benchmark.annualizationFactor);
+        surchargeTotal.netCharge.sample += surcharge.totalCharge;
+        surchargeTotal.netCharge.annualization += (surcharge.totalCharge / shipmentSummary.annualizationFactor);
 
-        surcharges.projectedCharge.sample += (sampleGrossCharge - (surcharge.targetDiscount / 100) * sampleGrossCharge);
-        surcharges.projectedCharge.annualization += (annualizedGrossCharge - (surcharge.targetDiscount / 100) * annualizedGrossCharge);
+        surchargeTotal.projectedCharge.sample += (sampleGrossCharge - (surcharge.targetDiscount / 100) * sampleGrossCharge);
+        surchargeTotal.projectedCharge.annualization += (annualizedGrossCharge - (surcharge.targetDiscount / 100) * annualizedGrossCharge);
     }
 
     for (const charge of Object.values(charges)) {
@@ -149,10 +143,9 @@ const summarize = async (benchmark: Benchmark): Promise<BenchmarkSummary> => {
     projectedTotal.discount = 100.0 * (grossTotal.annualization - projectedTotal.annualization) / grossTotal.annualization;
 
     return {
-        id: benchmark.id,
-        charges: Object.values(charges),
-        surcharges,
-        countTotal: count,
+        count,
+        transportationCharges: Object.values(charges),
+        surchargeTotal,
         grossTotal,
         netTotal,
         projectedTotal,

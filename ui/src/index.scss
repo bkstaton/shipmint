@@ -1,4 +1,10 @@
+@import '../node_modules/bulma/sass/utilities/_all.sass';
+
+$menu-label-color: $primary;
+$menu-item-color: $light;
+
 @import '../node_modules/bulma/bulma.sass';
+@import '../node_modules/@creativebulma/bulma-tooltip/src/sass/index.sass';
 
 .dollar:before {
   content: '$';
@@ -6,4 +12,20 @@
 
 .percent:after {
   content: '%';
+}
+
+.is-view-height {
+  height: 100vh;
+}
+
+.is-full-height {
+  height: 100%;
+  overflow: auto;
+}
+
+.is-centered {
+  width: auto;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
 }

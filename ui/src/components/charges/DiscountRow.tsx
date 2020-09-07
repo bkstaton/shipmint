@@ -3,10 +3,10 @@ import { formatDollar, formatPercentage } from '../../utility/format';
 
 interface Props {
     total: any;
-    saveTargetDiscount: (totalId: number, targetDiscount: number) => void;
+    saveTargetDiscount: (method: string, bucket: string, targetDiscount: number) => void;
 }
 
-const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) => {
+const DiscountRow = ({ total, saveTargetDiscount }: Props) => {
     const [ targetDiscount, setTargetDiscount ] = useState(total.targetDiscount);
 
     useEffect(() => {
@@ -62,7 +62,7 @@ const DiscountRow = ({ total, saveTargetDiscount: saveTargetDiscount }: Props) =
                     step={0.01}
                     value={targetDiscount}
                     onChange={e => setTargetDiscount(parseFloat(e.target.value))}
-                    onBlur={() => saveTargetDiscount(total.id, targetDiscount)}
+                    onBlur={() => saveTargetDiscount(total.method, total.bucket, targetDiscount)}
                 />
             </td>
             <td className="has-text-right">{formatDollar(proposedNetSpend)}</td>
