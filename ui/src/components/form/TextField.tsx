@@ -9,7 +9,6 @@ const TextField = (props: any) => {
             <label className="label">{props.label}</label>
             <div className="control">
                 <Text
-                    initialValue={props.initialValue}
                     className={`input ${touched ? (error ? 'is-danger' : 'is-success') : ''}`}
                     field={props.field}
                     validate={props.validate}

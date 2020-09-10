@@ -1,19 +1,22 @@
-import { Carrier, Customer } from "../../../models";
+import { Benchmark } from "../../../models";
 
 import PDFPrinter from 'pdfmake';
 import { Column } from "pdfmake/interfaces";
-import summarize from "../../customer/summary";
-import calculate from "../../customer/summary/calculate";
+import summarize from "../summarize";
 
-const pdf = async (customerId: string) => {
-    const customer = await Customer.findByPk(customerId);
-    if (!customer) {
-        throw new Error('Customer not found');
+const pdf = async (customerId: string, benchmarkId: string) => {
+    const benchmark = await Benchmark.findOne({
+        where: {
+            id: benchmarkId,
+            customerId,
+        }
+    });
+
+    if (benchmark === null) {
+        return null;
     }
-
-    const shipmentSummary = await calculate(customerId, Carrier.FedEx);
-
-    const charges = await summarize(shipmentSummary);
+    
+    const charges = await summarize(benchmark);
 
     const doc = new PDFPrinter({
         Raleway: {
@@ -63,13 +66,13 @@ const pdf = async (customerId: string) => {
         };
     };
 
-    const groundCharge = charges.transportationCharges.find((c) => {
+    const groundCharge = charges.charges.find((c) => {
         return c.type === 'FedEx Ground';
     });
-    const expressCharge = charges.transportationCharges.find((c) => {
+    const expressCharge = charges.charges.find((c) => {
         return c.type === 'FedEx Express';
     });
-    const surchargeCharge = charges.surchargeTotal;
+    const surchargeCharge = charges.surcharges;
 
     const sampleTargetDelta = charges.netTotal.sample - charges.projectedTotal.sample;
     const targetDelta = charges.netTotal.annualization - charges.projectedTotal.annualization;
@@ -90,7 +93,7 @@ const pdf = async (customerId: string) => {
                     } as Column,
                     [
                         {
-                            text: customer.name,
+                            text: (await benchmark.getCustomer()).name,
                             style: {
                                 bold: true,
                                 fontSize: 18,

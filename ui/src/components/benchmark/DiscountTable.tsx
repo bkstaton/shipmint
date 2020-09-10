@@ -2,13 +2,7 @@ import React from 'react';
 import DiscountRow from './DiscountRow';
 import { formatPercentage, formatDollar } from '../../utility/format';
 
-interface Props {
-    method: string;
-    totals: any[];
-    saveTargetDiscount: (method: string, bucket: string, targetDiscount: number) => void;
-}
-
-const DiscountTable = (props: Props) => {
+const DiscountTable = (props: { method: string, totals: any[], saveTargetDiscount: (totalId: number, targetDiscount: number) => void }) => {
     let totals = {
         transportationCharge: 0,
         count: 0,

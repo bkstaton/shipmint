@@ -1,27 +1,23 @@
 import React from 'react';
-import { BrowserRouter as Router, Switch } from 'react-router-dom';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
 
+import Layout from './components/Layout';
 import Login from './components/Login';
-import Summary from './components/Summary';
-import Shipments from './components/Shipments';
+import Benchmark from './components/Benchmark';
+import Customers from './components/Customers';
+import Customer from './components/Customer';
 import FedexMethodManager from './components/fedex/MethodManager';
-import RouteLayout from './components/routing/RouteLayout';
-import Charges from './components/Charges';
-import Surcharges from './components/Surcharges';
-import Default from './components/Default';
 
 function App() {
   return (
     <Router>
-      <Switch>
-        <RouteLayout path="/login" component={Login} />
-        <RouteLayout path="/customers/:customerId/summary" component={Summary} />
-        <RouteLayout path="/customers/:customerId/discounts" component={Charges} />
-        <RouteLayout path="/customers/:customerId/surcharges" component={Surcharges} />
-        <RouteLayout path="/customers/:customerId/shipments" component={Shipments} />
-        <RouteLayout path="/methods/fedex" component={FedexMethodManager} />
-        <RouteLayout path="*" component={Default} />
-      </Switch>
+      <Layout>
+        <Route path="/login" component={Login} />
+        <Route exact path="/customers" component={Customers} />
+        <Route exact path="/customers/:id" component={Customer} />
+        <Route exact path="/customers/:customerId/benchmarks/:benchmarkId" component={Benchmark} />
+        <Route exact path="/methods/fedex" component={FedexMethodManager} />
+      </Layout>
     </Router>
   );
 }
