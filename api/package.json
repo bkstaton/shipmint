@@ -25,7 +25,7 @@
     "@types/passport": "^1.0.4",
     "@types/passport-google-oauth20": "^2.0.3",
     "@types/tmp": "^0.1.0",
-    "aws-sdk": "^2.715.0",
+    "aws-sdk": "^2.814.0",
     "csv-parse": "^4.11.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
